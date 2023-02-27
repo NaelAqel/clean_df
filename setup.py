@@ -11,11 +11,11 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-    'numpy',
-    'pandas',
-    'missingno',
-    'IPython',
-    'matplotlib'
+    'missingno>=0.4.1',
+    'numpy>=1.19.3',
+    'pandas>=0.25.3',
+    'IPython>=7.10',
+    'matplotlib>=3.0.3'
 ]
 
 test_requirements = ['pytest>=3', ]
@@ -37,12 +37,13 @@ setup(
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
     ],
-    description="Python module to clean pandas dataframes fast and effectively.",
+    description="Python module to report, clean, and optimize Pandas Dataframes effectively",
     install_requires=requirements,
     license="MIT license",
     long_description=readme + '\n\n' + history,
     include_package_data=True,
-    keywords='clean_df',
+    keywords=['clean_df', 'cleaning', 'data analysis', 'data science', 'wrangling', 'reporting',
+              'optimization', 'outliers', 'missing'],
     name='clean_df',
     packages=find_packages(include=['clean_df', 'clean_df.*']),
     test_suite='tests',
