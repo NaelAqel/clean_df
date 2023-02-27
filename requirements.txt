@@ -1,0 +1,5 @@
+missingno>=0.4.1
+numpy>=1.19.3
+pandas>=0.25.3
+IPython>=7.10
+matplotlib>=3.0.3
