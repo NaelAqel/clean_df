@@ -132,8 +132,8 @@ class TestIqr:
         # concatenate all in one array
         arr = np.concatenate((arr_low, arr_mid, arr_high))
 
-        # arr will have 6 lower and 7 upper outlier, full arr size is 100
-        assert iqr(arr) == pytest.approx([6, 7, 13, 13])
+        # arr will have 6 lower and 8 upper outlier, full arr size is 100
+        assert iqr(arr) == pytest.approx([6, 8, 14, 14])
 
     def test_without_outliers(self):
         # take random uniform distribution array
