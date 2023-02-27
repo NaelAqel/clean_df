@@ -8,7 +8,7 @@ Welcome to clean_df's documentation!
    readme
    installation
    usage
-   modules
+   module
    contributing
    authors
    history
