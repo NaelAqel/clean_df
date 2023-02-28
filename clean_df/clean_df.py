@@ -25,35 +25,36 @@ class CleanDataFrame:
     This class is used to clean and optimize a pandas dataframe for further
     analysis.
 
-    :ivar df: The dataframe to be cleaned and optimized or after cleaning and
-        optimization
-    :vartype df: pandas.Dataframe
-    :ivar max_num_cat: The maximum number of unique values in a column for it
-        to be considered categorical
-    :vartype max_num_cat: int
-    :ivar unique_val_cols: List of the columns which have a unique value
-    :vartype unique_val_cols: list
-    :ivar duplicate_inds: List of the indices of duplicated rows
-    :vartype duplicate_inds: list
-    :ivar cols_to_optimize: A dictionary of all numerical columns that can be
-        memory optimized, it will be {column name: optimized data type}
-    :vartype cols_to_optimize: dict
-    :ivar outliers: A dictionary for outliers details (list of four values) as
-        {column name: outlier details} format, outliers details list have:
-            - The number of lower outliers
-            - The number of upper outliers
-            - The total number of outliers
-            - The percentage of the total number of values that are outliers
-    :vartype outliers: dict
-    :ivar missing_cols: A dictionary for missing details (list of two values)
-        as {column name: missing details} format, missing details list have:
-            - The total number of missing values
-            - The percentage of the total number of values that are missing
-    :vartype missing_cols: dict
-    :ivar cat_cols: List of columns that can be converted to categorical type
-    :vartype cat_cols: list
-    :ivar num_cols: List of numerical columns
-    :vartype num_cols: list
+        :ivar df: The dataframe to be cleaned and optimized or after cleaning
+            and optimization
+        :vartype df: pandas.Dataframe
+        :ivar max_num_cat: The maximum number of unique values in a column for
+            it to be considered categorical
+        :vartype max_num_cat: int
+        :ivar unique_val_cols: List of the columns which have a unique value
+        :vartype unique_val_cols: list
+        :ivar duplicate_inds: List of the indices of duplicated rows
+        :vartype duplicate_inds: list
+        :ivar cols_to_optimize: A dictionary of all numerical columns that can
+            be memory optimized, it will be {column name: optimized data type}
+        :vartype cols_to_optimize: dict
+        :ivar outliers: A dictionary for outliers details in a list as
+            {column name: outlier details} format, the list has:
+                - The number of lower outliers
+                - The number of upper outliers
+                - The total number of outliers
+                - The percentage of the total values that are outliers
+        :vartype outliers: dict
+        :ivar missing_cols: A dictionary for missing details in a list
+            as {column name: missing details} format, the list has:
+                - The total number of missing values
+                - The percentage of the total values that are missing
+        :vartype missing_cols: dict
+        :ivar cat_cols: List of columns that can be converted to categorical
+            type
+        :vartype cat_cols: list
+        :ivar num_cols: List of numerical columns
+        :vartype num_cols: list
     """
     def __init__(self, df, max_num_cat=10) -> None:
         """Constructor for CleanDataFrame

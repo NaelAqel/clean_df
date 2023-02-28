@@ -45,13 +45,13 @@ To install ``clean_df``, run this command in your terminal::
 
     $ pip install clean_df
 
-For more information on installation details for this project, please see the :doc:`installation` file.
+For more information on installation details for this project, please see :doc:`installation`.
 
 
     
 Usage
 -----
-This module is very easy to use, for a full detailed example please see the :doc:`usage` file.
+This module is very easy to use, for a full detailed example please see :doc:`usage`.
 
 Importing the module
 ^^^^^^^^^^^^^^^^^^^^
@@ -108,7 +108,7 @@ Accessing the Cleaned Data DataFrame
   
 Contributing
 ------------
-See the :doc:`contributing` for contribution details. Feel free to contact me for any subject through my:  
+See :doc:`contributing` for contribution details. Feel free to contact me for any subject through my:  
 
 * `Email`_
 * `LinkedIn`_

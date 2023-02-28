@@ -51,7 +51,7 @@ For more information on installation details for this project, please see the ``
     
 Usage
 -----
-This module is very easy to use, for a full detailed example please see the `docs/usage.rst` file.
+This module is very easy to use, for a full detailed example please see the ``docs/usage.rst`` file.
 
 Importing the module
 ^^^^^^^^^^^^^^^^^^^^
