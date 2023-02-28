@@ -12,7 +12,8 @@ np.random.seed(0)
 
 
 class TestOptimizeNum:
-    """This class is to test optimize_num function from utils.py
+    """
+    This class is to test optimize_num function from utils.py
     """
     # first we will test all cases that cause errors
     def test_errors(self):
@@ -108,7 +109,8 @@ class TestOptimizeNum:
 
 
 class TestIqr:
-    """This class is to test iqr function from utils.py.
+    """
+    This class is to test iqr function from utils.py.
     """
     # first we will test all cases that cause errors
     def test_errors(self):

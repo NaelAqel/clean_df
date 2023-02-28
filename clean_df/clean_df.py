@@ -19,51 +19,131 @@ pd.set_option('display.max_colwidth', None)
 
 class CleanDataFrame:
     """
-    CleanDataFrame
-    ==============
-
     This class is used to clean and optimize a pandas dataframe for further
     analysis.
 
-        :ivar df: The dataframe to be cleaned and optimized or after cleaning
-            and optimization
-        :vartype df: pandas.Dataframe
-        :ivar max_num_cat: The maximum number of unique values in a column for
-            it to be considered categorical
-        :vartype max_num_cat: int
-        :ivar unique_val_cols: List of the columns which have a unique value
-        :vartype unique_val_cols: list
-        :ivar duplicate_inds: List of the indices of duplicated rows
-        :vartype duplicate_inds: list
-        :ivar cols_to_optimize: A dictionary of all numerical columns that can
-            be memory optimized, it will be {column name: optimized data type}
-        :vartype cols_to_optimize: dict
-        :ivar outliers: A dictionary for outliers details in a list as
-            {column name: outlier details} format, the list has:
-                - The number of lower outliers
-                - The number of upper outliers
-                - The total number of outliers
-                - The percentage of the total values that are outliers
-        :vartype outliers: dict
-        :ivar missing_cols: A dictionary for missing details in a list
-            as {column name: missing details} format, the list has:
-                - The total number of missing values
-                - The percentage of the total values that are missing
-        :vartype missing_cols: dict
-        :ivar cat_cols: List of columns that can be converted to categorical
-            type
-        :vartype cat_cols: list
-        :ivar num_cols: List of numerical columns
-        :vartype num_cols: list
+    Attributes
+    ----------
+    df : pandas.DataFrame
+        The dataframe to be cleaned and optimized or after cleaning and
+        optimization.
+    max_num_cat : int
+        The maximum number of unique values in a column for it to be
+        considered categorical.
+    unique_val_cols : list of str, readonly
+        List of the columns which have a unique value.
+    duplicate_inds : list of int, readonly
+        List of the indices of duplicated rows.
+    cols_to_optimize : dict, readonly
+        A dictionary of all numerical columns that can be memory optimized, it
+        will be {column name: optimized data type}.
+    outliers : dict, readonly
+        A dictionary for outliers details in a list as {column name: outlier
+        details} format, the list has:
+            - The number of lower outliers
+            - The number of upper outliers
+            - The total number of outliers
+            - The percentage of the total values that are outliers
+    missing_cols : dict, readonly
+        A dictionary for missing details in a list as {column name: missing
+        details} format, the list has:
+            - The total number of missing values
+            - The percentage of the total values that are missing
+    cat_cols : list of str, readonly
+        List of columns that can be converted to categorical type.
+    num_cols : list of str, readonly
+        List of numerical columns.
+
+    Methods
+    -------
+    __init__(self, df, max_num_cat=10) -> None:
+        Constructor for CleanDataFrame.
+
+        Parameters
+        ----------
+        df : pandas.DataFrame
+            The dataframe to be cleaned and optimized.
+        max_num_cat : int, optional
+            The maximum number of unique values in a column for it to be
+            considered categorical, defaults to 10.
+    report(self, show_matrix=True, show_heat=True, matrix_kws={}, \
+        heat_kws={}) -> None:
+        Generate a summary report of the dataset, including:
+            1. Columns with unique value report.
+            2. Duplicated rows report.
+            3. Columns' Datatype to optimize memory report.
+            4. Outliers report.
+            5. Missing values report.
+        Each report will have a text message, then show a dataframe or plots
+        if applicable.
+
+        Parameters
+        ----------
+        show_matrix : bool, optional
+            A flag to control whether to show the missing value matrix plot
+            or not, defaults to True.
+        heat_matrix : bool, optional
+            A flag to control whether to show the missing value heatmap plot
+            or not, defaults to True.
+        matrix_kws : dict, optional
+            Keyword arguments passed to the missing value matrix plot,
+            defaults to {}.
+        heat_kws : dict, optional
+            Keyword arguments passed to the missing value heatmap plot,
+            defaults to {}.
+
+        Raises
+        ------
+        TypeError
+            If any parameter has the wrong type.
+    clean(self, min_missing_ratio=0.05, drop_nan=True, drop_kws={}, \
+        drop_duplicates_kws={}) -> None:
+        Drops columns with a high ratio of missing values and duplicate rows.
+
+        Parameters
+        ----------
+        min_missing_ratio : float, optional
+            The minimum ratio of missing values for columns to drop. Value
+            should be between 0 and 1. Defaults to 0.05.
+        drop_nan : bool, optional
+            A flag to decide whether to drop any rows that contain missing
+            values after dropping the columns with above `min_missing_ratio`
+            missing values. Defaults to True.
+        drop_kws : dict, optional
+            Keyword arguments passed to the `drop()` function. Defaults to {}.
+        drop_duplicates_kws : dict, optional
+            Keyword arguments passed to the `drop_duplicates()` function.
+            Defaults to {}.
+
+        Raises
+        ------
+        TypeError
+            If `drop_nan` is not boolean, or if `drop_kws` or
+            `drop_duplicates_kws` have the wrong types.
+        ValueError
+            If `min_missing_ratio` is not between 0 and 1, or if `drop_kws`
+            or `drop_duplicates_kws` have a key `inplace`.
+    optimize(self) -> None:
+        Optimizes the dataframe by converting columns to the desired data type
+        and converting categorical columns to 'category' data type. Note that
+        numerical columns should not contain missing values.
+
+        Raises
+        ------
+        Warning
+            If any numerical column contains missing values.
     """
     def __init__(self, df, max_num_cat=10) -> None:
-        """Constructor for CleanDataFrame
+        """
+        Constructor for CleanDataFrame.
 
-        :param df: The dataframe to be cleaned and optimized
-        :type df: pandas.Dataframe
-        :param max_num_cat: The maximum number of unique values in a column
-            for it to be considered categorical, default to 10
-        :type max_num_cat: int, optional
+        Parameters
+        ----------
+        df : pandas.DataFrame
+            The dataframe to be cleaned and optimized.
+        max_num_cat : int, optional
+            The maximum number of unique values in a column for it to be
+            considered categorical, defaults to 10.
         """
         # save df, and max_num_cat
         self._df = df
@@ -75,38 +155,50 @@ class CleanDataFrame:
     # (we will put both getter and setter methods for them).
     @property
     def df(self) -> pd.DataFrame:
-        """Gets the value of df.
+        """
+        Get the value of df.
 
-        :return: The value of df
-        :rtype: pandas.Dataframe
+        Returns
+        -------
+        pandas.DataFrame
+            The value of df.
         """
         return self._df
 
     @df.setter
     def df(self, value) -> None:
-        """Sets the value of df.
+        """
+        Set the value of df.
 
-        :param value: The new value of df
-        :type value: int
+        Parameters
+        ----------
+        value : pandas.DataFrame
+            The new value of df.
         """
         self._df = value
         self._update()
 
     @property
     def max_num_cat(self) -> int:
-        """Gets the value of max_num_cat.
+        """
+        Get the value of max_num_cat.
 
-        :return: The value of max_num_cat
-        :rtype: int
+        Returns
+        -------
+        int
+            The value of max_num_cat.
         """
         return self._max_num_cat
 
     @max_num_cat.setter
     def max_num_cat(self, value) -> None:
-        """Sets the value of max_num_cat.
+        """
+        Set the value of max_num_cat.
 
-        :param value: The new value of max_num_cat
-        :type value: int
+        Parameters
+        ----------
+        value : int
+            The new value of max_num_cat.
         """
         self._max_num_cat = value
         self._update()
@@ -114,72 +206,106 @@ class CleanDataFrame:
     # all other attributes will have are read-only, so only have getter
     @property
     def unique_val_cols(self) -> list:
-        """Gets the value of unique_val_cols.
+        """
+        Get the value of unique_val_cols.
 
-        :return: The value of unique_val_cols
-        :rtype: list
+        Returns
+        -------
+        list
+            The value of unique_val_cols.
         """
         return self._unique_val_cols
 
     @property
     def duplicate_inds(self) -> list:
-        """Gets the value of duplicate_inds.
+        """
+        Get the value of duplicate_inds.
 
-        :return: The value of duplicate_inds
-        :rtype: list
+        Returns
+        -------
+        list
+            The value of duplicate_inds.
         """
         return self._duplicate_inds
 
     @property
     def cols_to_optimize(self) -> dict:
-        """Gets the value of cols_to_optimize.
+        """
+        Get the value of cols_to_optimize.
 
-        :return: The value of cols_to_optimize
-        :rtype: dict
+        Returns
+        -------
+        dict
+            The value of cols_to_optimize.
         """
         return self._cols_to_optimize
 
     @property
     def outliers(self) -> dict:
-        """Gets the value of outliers.
+        """
+        Get the value of outliers.
 
-        :return: The value of outliers
-        :rtype: dict
+        Returns
+        -------
+        dict
+            The value of outliers.
         """
         return self._outliers
 
     @property
     def missing_cols(self) -> dict:
-        """Gets the value of missing_cols.
+        """
+        Get the value of missing_cols.
 
-        :return: The value of missing_cols
-        :rtype: dict
+        Returns
+        -------
+        dict
+            The value of missing_cols.
         """
         return self._missing_cols
 
     @property
     def cat_cols(self) -> list:
-        """Gets the value of cat_cols.
+        """
+        Get the value of cat_cols.
 
-        :return: The value of cat_cols
-        :rtype: list
+        Returns
+        -------
+        list
+            The value of cat_cols.
         """
         return self._cat_cols
 
     @property
     def num_cols(self) -> list:
-        """Gets the value of num_cols.
+        """
+        Get the value of num_cols.
 
-        :return: The value of num_cols
-        :rtype: list
+        Returns
+        -------
+        list
+            The value of num_cols.
         """
         return self._num_cols
 
     def _update(self) -> None:
-        """Sets or updates all attributes for `CleanDataFrame` class.
+        """
+        Set or update all attributes for the CleanDataFrame class.
 
-        :raises TypeError: If `df` is not a pandas dataframe
-        :raises ValueError: If `max_num_cat` is not a positive integer
+        Parameters
+        ----------
+        df : pandas.DataFrame
+            The dataframe to be cleaned and optimized.
+        max_num_cat : int
+            The maximum number of unique values in a column for it to be
+            considered categorical.
+
+        Raises
+        ------
+        TypeError
+            If `df` is not a pandas dataframe.
+        ValueError
+            If `max_num_cat` is not a positive integer.
         """
         # check that parameters are correct types and values
         if not isinstance(self._df, pd.DataFrame):
@@ -241,28 +367,35 @@ class CleanDataFrame:
 
     def report(self, show_matrix=True, show_heat=True, matrix_kws={},
                heat_kws={}) -> None:
-        """Reports summary of the dataset, it includes:
+        """
+        Generate a summary report of the dataset, including:
             1. Columns with unique value report.
             2. Duplicated rows report.
             3. Columns' Datatype to optimize memory report.
             4. Outliers report.
             5. Missing values report.
-        Each report will have a text massage, then show dataframe or plots
+        Each report will have a text message, then show a dataframe or plots
         if applicable.
 
-        :param show_matrix: A flag to control whether to show the missing
-            value matrix plot or not , defaults to True
-        :type show_matrix: bool, optional
-        :param heat_matrix: A flag to control whether to show the missing
-            value heatmap plot or not , defaults to True
-        :type heat_matrix: bool, optional
-        :param matrix_kws: Keyword arguments passed to the missing value
-            matrix plot, defaults to {}
-        :type matrix_kws: dict, optional
-        :param heat_kws: Keyword arguments passed to the missing value
-            heatmap plot, defaults to {}
-        :type heat_kws: dict, optional
-        :raises TypeError: If any parameter has wrong type
+        Parameters
+        ----------
+        show_matrix : bool, optional
+            A flag to control whether to show the missing value matrix plot
+            or not, defaults to True.
+        heat_matrix : bool, optional
+            A flag to control whether to show the missing value heatmap plot
+            or not, defaults to True.
+        matrix_kws : dict, optional
+            Keyword arguments passed to the missing value matrix plot,
+            defaults to {}.
+        heat_kws : dict, optional
+            Keyword arguments passed to the missing value heatmap plot,
+            defaults to {}.
+
+        Raises
+        ------
+        TypeError
+            If any parameter has the wrong type.
         """
         # check parameters' type
         if (not isinstance(show_matrix, bool)) \
@@ -342,28 +475,32 @@ class CleanDataFrame:
 
     def clean(self, min_missing_ratio=0.05, drop_nan=True, drop_kws={},
               drop_duplicates_kws={}) -> None:
-        """This function drops columns that have a high ratio of missing
-        values and duplicate rows in the dataframe
+        """
+        Drops columns with a high ratio of missing values and duplicate rows.
 
-        :param min_missing_ratio: The minimum ratio of missing values for
-            columns to drop, value should be between 0 and 1, defaults to 0.05
-        :type min_missing_ratio: float, optional
-        :param drop_nan: A flag to deceide wither drop any rows that contain
-            missing values after dropping the columns which have above than
-            `min_missing_ratio` missing values, defaults to True
-        :type drop_nan: bool, optional
-        :param drop_kws: Keyword arguments passed to `drop()` function,
-            defaults to {}
-        :type drop_kws: dict, optional
-        :param drop_duplicates_kws: Keyword arguments passed to
-            `drop_duplicates()` function, defaults to {}
-        :type drop_duplicates_kws: dict, optional
-        :raises TypeError: If `drop_nan` is not boolean
-        :raises TypeError: If `drop_kws` or `drop_duplicates_kws` have wrong
-            types
-        :raises ValueError: If `min_missing_ratio` is not between 0 and 1
-        :raises ValueError: If `drop_kws` or `drop_duplicates_kws` have a key
-            `inplace`
+        Parameters
+        ----------
+        min_missing_ratio : float, optional
+            The minimum ratio of missing values for columns to drop. Value
+            should be between 0 and 1. Defaults to 0.05.
+        drop_nan : bool, optional
+            A flag to decide whether to drop any rows that contain missing
+            values after dropping the columns with above `min_missing_ratio`
+            missing values. Defaults to True.
+        drop_kws : dict, optional
+            Keyword arguments passed to the `drop()` function. Defaults to {}.
+        drop_duplicates_kws : dict, optional
+            Keyword arguments passed to the `drop_duplicates()` function.
+            Defaults to {}.
+
+        Raises
+        ------
+        TypeError
+            If `drop_nan` is not boolean, or if `drop_kws` or
+            `drop_duplicates_kws` have the wrong types.
+        ValueError
+            If `min_missing_ratio` is not between 0 and 1, or if `drop_kws`
+            or `drop_duplicates_kws` have a key `inplace`.
         """
         # check if drop_nan is not boolean
         if not isinstance(drop_nan, bool):
@@ -410,11 +547,15 @@ class CleanDataFrame:
         self.df = df_copy
 
     def optimize(self) -> None:
-        """This function optimizes the dataframe by converting columns to the
-        desired data type and converting categorical columns to 'category'
-        data type. Note that numerical columns should be free from missings.
+        """
+        Optimizes the dataframe by converting columns to the desired data type
+        and converting categorical columns to 'category' data type. Note that
+        numerical columns should not contain missing values.
 
-        .. warnings also:: if any numerical column contain missing values
+        Raises
+        ------
+        Warning
+            If any numerical column contains missing values.
         """
         if self._cols_to_optimize != {} or len(self._cat_cols) > 0:
             # if there are columns to optimize, convert them to the optimized
@@ -447,12 +588,15 @@ class CleanDataFrame:
             self.df = df_copy
 
     def _unique_val_report(self) -> str:
-        """Reports the columns with unique values.
+        """
+        Reports the columns with unique values.
 
-        :returns: A string contains a `header` which explaining the report
+        Returns
+        -------
+        str
+            A string contains a `header` which explaining the report
             purpose and a `body` that show the details (as per the
             availability of unique value columns)
-        :rtype: str
         """
         # define report header
         header = '- Checking if any column has a unique value ... '
@@ -467,14 +611,17 @@ class CleanDataFrame:
         return header + body
 
     def _duplicated_report(self) -> Tuple[str, Optional[pd.DataFrame]]:
-        """Reports the duplicated rows.
+        """
+        Reports the duplicated rows.
 
-        :return: A tuple containing:
-            - A string contains a `header` which explaining the report purpose
-                and a `body` that show the details (as per the availability of
-                duplicated rows)
-            - A dataframe of duplicated rows, or None if no duplicated rows
-        :rtype: tuple
+        Returns
+        -------
+        msg: str
+            A string contains a `header` which explaining the report purpose
+            and a `body` that show the details (as per the availability of
+            duplicated rows).
+        data: pandas.DataFrame or None
+            A dataframe of duplicated rows, or None if no duplicated rows.
         """
         # define report header
         header = '- Checking if data frame has duplicated rows ... '
@@ -498,17 +645,18 @@ class CleanDataFrame:
 
     def _optimization_report(self) -> Tuple[str, Optional[str],
                                             Optional[pd.DataFrame]]:
-        """Reports the columns that can change datatypes for optimization.
+        """
+        Reports the columns that can change datatypes for optimization.
 
-        :return: A tuple containing:
-            - A string contains a `header` which explaining the report purpose
-                and a `body` that show the details (as per the availability of
-                categorical columns to optimize)
-            - A string contains details about columns that can be categorical,
-                or None if no columns
-            - A dataframe of columns optimization datatype details, or None if
-                no columns to optimize
-        :rtype: tuple
+        Returns
+        -------
+        msg: str
+            A string contains a `header` which explaining the report purpose
+            and a `body` that show the details (as per the availability of
+            categorical columns to optimize).
+        data: pandas.DataFrame or None
+            A dataframe of columns optimization datatype details, or None if
+            no columns to optimize.
         """
         # define report header
         header = '- Checking datatypes to optimize memory ... '
@@ -547,15 +695,17 @@ class CleanDataFrame:
         return msg, msg_cat, data
 
     def _outliers_report(self) -> Tuple[str, Optional[pd.DataFrame]]:
-        """Reports the outliers in columns.
+        """
+        Reports the outliers in columns.
 
-        :returns: A tuple containing:
-            - A string contains a `header` which explaining the report purpose
-                and a `body` that show the details (as per the availability of
-                outliers in columns)
-            - A dataframe of outlier details in columns, or None if no
-                outliers
-        :rtype: tuple
+        Returns
+        -------
+        msg: str
+            A string contains a `header` which explaining the report purpose
+            and a `body` that show the details (as per the availability of
+            outliers in columns).
+        data: pandas.DataFrame or None
+            A dataframe of outlier details in columns, or None if no outliers.
         """
         # define report header
         header = '- Checking for outliers ... '
@@ -581,30 +731,37 @@ class CleanDataFrame:
     def _missing_report(self, show_matrix, show_heat, matrix_kws, heat_kws)\
         -> Tuple[str, Optional[pd.DataFrame], Optional[plt.Axes],
                  Optional[plt.Axes]]:
-        """Report the missing values with matrix and heat plot details.
+        """
+        Reports the missing values with matrix and heat plot details.
 
-        :param show_matrix: A flag to control whether to show the missing
-            value matrix plot or not
-        :type show_matrix: bool
-        :param show_heat: A flag to control whether to show the missing value
-            heatmap plot or not
-        :type show_heat: bool
-        :param matrix_kws: Keyword arguments passed to the missing value
-            matrix plot
-        :type matrix_kws: dict
-        :param heat_kws: Keyword arguments passed to the missing value heatmap
-            plot
-        :type heat_kws: dict
-        :return: A tuple containing:
-            - A string contains a `header` which explaining the report purpose
-                and a `body` that show the details (as per the availability of
-                missing values)
-            - A dataframe of missing values details, or None if no missings
-            - A Matrix plot (from `missingno` backage) if there are missing
-                values and show_matrix is True, or None otherwise
-            - A Heat plot (from `missingno` backage) if there are missing
-                values and show_heat is True, or None otherwise
-        :rtype: tuple
+        Parameters
+        ----------
+        show_matrix : bool
+            A flag to control whether to show the missing value matrix plot or
+            not.
+        show_heat : bool
+            A flag to control whether to show the missing value heatmap plot
+            or not.
+        matrix_kws : dict
+            Keyword arguments passed to the missing value matrix plot.
+        heat_kws : dict
+            Keyword arguments passed to the missing value heatmap plot.
+
+        Returns
+        -------
+        msg : str
+            A string contains a `header` which explaining the report purpose
+            and a `body` that show the details (as per the availability of
+            missing values)
+        data : pandasd.DataFrame or None
+            A dataframe of missing values details, or None if no missings
+        matrix : plt.Axes or None
+            A Matrix plot (from `missingno` backage) if there are missing
+            values and show_matrix is True, or None otherwise
+        heat : plt.Axes or None
+            A Heat plot (from `missingno` backage) if there are missing
+            values and show_heat is True, or None otherwise.
+
         """
         # define report header
         header = '- Checking for missing values ... '

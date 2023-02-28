@@ -7,24 +7,33 @@ import string
 
 
 def num_generator(type_, size) -> np.ndarray:
-    """Generates a numpy array of numerical values that have distribution
+    """
+    Generates a numpy array of numerical values that have distribution
     within `type_` value limits, also array will have a random number of
     outliers. Note that the output array will be float64 datatype, the
     function just produce array within `type_` limits.
 
-    :param type_: The type where data will be in its limitations (for example
-        numpy.int8 has values between -128 and 127). Values can be any (uint,
-        int, float) types only
-    :type type_: :class:`numpy.dtype`
-    :param size: The size of the generated array
-    :type size: int
-    :raises ValueError: If `type_` is not a numerical type, accepted types are
+    Parameters
+    ----------
+    type_ : numpy.dtype
+        The type where data will be in its limitations (for example np.int8
+        has values between -128 and 127). Values can be any (uint, int, float)
+        types only.
+    size : int
+        The size of the generated array.
+
+    Raises
+    ------
+    ValueError
+        If `type_` is not a numerical type, accepted types are
         [`np.uint8`, `np.uint16`, `np.uint32`, `np.uint64`, `np.int8`,
         `np.int16`, `np.int32`, `np.int64`, `np.float16`, `np.float32`,
-        `np.float64`]. If `size` is not a positive integer
+        `np.float64`]. If `size` is not a positive integer.
 
-    :return: The generated numpy array
-    :rtype: numpy.ndarray
+    Returns
+    -------
+    numpy.ndarray
+        The generated numpy array.
     """
     # assign accepted types
     int_types = [np.uint8, np.uint16, np.uint32, np.uint64, np.int8, np.int16,
@@ -79,18 +88,29 @@ def num_generator(type_, size) -> np.ndarray:
 
 
 def str_generator(size, unique_num=0) -> np.ndarray:
-    """ Generate a numpy array of string values.
+    """
+    Generate a numpy array of string values.
 
-    :param size: The size of the generated array
-    :type size: int
-    :param unique_num: The number of unique values in generated array, if not
-        specified (i.e. 0) then number will be randomly selected within the
-        function, defaults to 0
-    :type unique_num: int, optional
-    :raises ValueError: If `unique_num` is not 0 or positive integer
-    :raises ValueError: If `size` is not a positive integer
-    :return: The generated numpy array
-    :rtype: numpy.ndarray
+    Parameters
+    ----------
+    size : int
+        The size of the generated array
+    unique_num : int, optional
+        The number of unique values in generated array, if not specified
+        (i.e. 0) then number will be randomly selected within the function,
+        defaults to 0
+
+    Raises
+    ------
+    ValueError
+        If `unique_num` is not 0 or positive integer.
+    ValueError
+        If `size` is not a positive integer.
+
+    Returns
+    -------
+    numpy.ndarray
+        The generated numpy array
     """
     # check unique_num value
     if (not isinstance(unique_num, int)) or unique_num < 0:
@@ -118,7 +138,8 @@ def str_generator(size, unique_num=0) -> np.ndarray:
 
 
 def generate_df(size) -> pd.DataFrame:
-    """This function will generate a dataframe with 'size' rows, with columns:
+    """
+    This function will generate a dataframe with 'size' rows, with columns:
         1- `single_value`: which has one value `A`.
         2- `all_missing`: all `NaN`.
         3- `uint{x}': x in [8, 16, 32, 64], these columns contain random
@@ -135,11 +156,20 @@ def generate_df(size) -> pd.DataFrame:
         9- `str{x}`: 3 columns with random strings.
     Some columns will have a random number of Missing values.
 
-    :param size: The number of rows of generated dataframe
-    :type size: int
-    :raises ValueError: If `size` is not a positive integer
-    :return: The generated dataframe
-    :rtype: pandas.DataFrame
+    Parameters
+    ----------
+    size : int
+        The number of rows of generated dataframe
+
+    Raises
+    ------
+    ValueError
+        If `size` is not a positive integer.
+
+    Returns
+    -------
+    pandas.DataFrame
+        The generated dataframe.
     """
     # check size value
     if (not isinstance(size, int)) or size < 1:

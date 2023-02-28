@@ -7,21 +7,30 @@ from typing import Optional
 
 
 def optimize_num(arr) -> Optional[np.dtype]:
-    """Optimize the data type of a numerical array.
+    """
+    Optimize the data type of a numerical array.
     The function determines the optimal data type for the array based on the
     data type and minimum and maximum values of the elements in the array. If
     the optimized data type is not the same ``arr`` data type (``arr`` can be
     optimized), the function returns the optimized data type.
 
-    :param arr: A numerical numpy array
-    :type arr: numpy.ndarray
-    :raises TypeError: If ``arr`` is not a numpy array
-    :raises ValueError: If ``arr`` is not a numerical numpy array or all 
-        values are NaN
+    Parameters
+    ----------
+    arr : numpy.ndarray
+        A numerical numpy array.
 
-    :return: The optimized data type for the array if the array can be
-        optimized, or None if the array data type can not be optimized
-    :rtype: :class:`numpy.dtype` or None
+    Raises
+    ------
+    TypeError
+        If ``arr`` is not a numpy array.
+    ValueError
+        If ``arr`` is not a numerical numpy array or all values are NaN.
+
+    Returns
+    -------
+    numpy.dtype or None
+        The optimized data type for the array if the array can be optimized,
+        or None if the array data type cannot be optimized.
     """
     # check if input is not an array
     if not isinstance(arr, np.ndarray):
@@ -74,7 +83,8 @@ def optimize_num(arr) -> Optional[np.dtype]:
 
 
 def iqr(arr) -> Optional[list]:
-    """Calculates the interquartile range (IQR) of a numerical array.
+    """
+    Calculates the interquartile range (IQR) of a numerical array.
     The IQR is calculated as the difference between the 75th percentile and
     the 25th percentile of the array, and any values outside of 1.5 times the
     IQR are considered outliers. The function returns the number of lower
@@ -82,18 +92,27 @@ def iqr(arr) -> Optional[list]:
     the total number of values that are outliers only if there are outliers in
     the array.
 
-    :param arr: A numerical numpy array
-    :type arr: numpy.ndarray
-    :raises TypeError: If ``arr`` is not a numpy array
-    :raises ValueError: If ``arr`` is not a numerical numpy array or all
-        values are NaN.
+    Parameters
+    ----------
+    arr : numpy.ndarray
+        A numerical numpy array.
 
-    :return: A list containing:
-                - int: The number of lower outliers
-                - int: The number of upper outliers
-                - int: The total number of outliers
-                - float: The percentage of outliers to total values of array
-            Or None if there are no outliers
+    Raises
+    ------
+    TypeError
+        If ``arr`` is not a numpy array.
+    ValueError
+        If ``arr`` is not a numerical numpy array or all values are NaN.
+
+    Returns
+    -------
+    list or None
+        A list containing:
+            - int: The number of lower outliers
+            - int: The number of upper outliers
+            - int: The total number of outliers
+            - float: The percentage of outliers to total values of array
+        Or None if there are no outliers
     :rtype: list or None
     """
     # check if input is not an array

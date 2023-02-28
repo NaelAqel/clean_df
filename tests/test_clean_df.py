@@ -6,13 +6,13 @@ import pytest
 from clean_df.clean_df import CleanDataFrame
 from tests.data_generator import generate_df
 import numpy as np
-import pandas as pd
 # fix numpy seed to 0
 np.random.seed(0)
 
 
 class TestCleanDataFrame:
-    """This class will test :class:`CleanDataFrame` from `clean_df` package.
+    """
+    This class will test :class:`CleanDataFrame` from `clean_df` package.
     """
     def setup_class(self):
         # initialize df to use in all tests
