@@ -143,9 +143,8 @@ Documentation
 Credits
 -------
 * This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.  
-* I gained most of my knowledge through the `Datacamp Python Programmer`_ track, specially `Developing Python Packages`_ course.
+* Here are `additional`_ resources I got a lot from them.
 
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
 .. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
-.. _`Datacamp Python Programmer`: datacamp.pxf.io/P0JMNz
-.. _`Developing Python Packages`: datacamp.pxf.io/ZdnM3q
+.. _`additional`: https://naelaqel.com/resources/
