@@ -2,7 +2,7 @@
 Usage
 =====
 
-In this detailed example, we will use 2009 Airline Delay dataset, saved as ``2009.csv``, the dataset is available in `Kaggle`_.
+In this detailed example, we will use 2019 Airline Delay dataset, saved as ``2019.csv``, the dataset is available in `Kaggle`_.
 
 .. _Kaggle: https://www.kaggle.com/datasets/sherrytp/airline-delay-analysis
 
@@ -137,7 +137,7 @@ To clean the dataframe (remove missing, unique value columns and duplication)::
 
         >>> cdf.clean(
                 min_missing_ratio=0.05,    # the minimum ratio of missing values to drop a column, default is 0.05
-                drop_nan=True              # if True, drop the rows with missing values after dropping columns 
+                drop_nan=True,             # if True, drop the rows with missing values after dropping columns 
                                            # with missingsa above min_missing_ratio
                 drop_kws={},               # if need to pass any arguments to pd.DataFrame.drop(), default is {}
                 drop_duplicates_kws={}     # same drop_kws, but for drop_duplicates function
