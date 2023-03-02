@@ -6,6 +6,7 @@ import pytest
 from clean_df.clean_df import CleanDataFrame
 from tests.data_generator import generate_df
 import numpy as np
+import pandas as pd
 # fix numpy seed to 0
 np.random.seed(0)
 
@@ -82,10 +83,29 @@ class TestCleanDataFrame:
             with pytest.warns(UserWarning):
                 cdf1.optimize()
 
+    def test_change_attributes(self):
+        df1 = self.df.copy()
+        cdf1 = CleanDataFrame(df1, max_num_cat=5)
+        # check attribute values
+        pd.testing.assert_frame_equal(df1, cdf1.df)
+        assert cdf1.max_num_cat == 5
+
+        def test_change_df(self):
+            cdf1.df = df1.head(10)
+            pd.testing.assert_frame_equal(df1.head(10), cdf1.df)
+
+        def test_change_max_num_cat(self):
+            cdf1.max_num_cat = 10
+            assert cdf1.max_num_cat == 10
+
+        def test_change_column_name(self):
+            cdf1.df.columns = ['col_1'] + [*df1.columns[1:]]
+            assert cdf1.df.columns[0] == 'col_1'
+
     def test_attributes_before_cleaning(self):
         # will check here all public attributes (before run any method)
         # assert df
-        # assert pd.testing.assert_frame_equal(self.df, self.cdf.df)
+        pd.testing.assert_frame_equal(self.df, self.cdf.df)
 
         # assert max_num_cat
         assert self.cdf.max_num_cat == 5
@@ -119,7 +139,9 @@ class TestCleanDataFrame:
             'str2': [6, 5.83]}
 
         # assert cat_cols
-        assert sorted(self.cdf.cat_cols) == ['cat1', 'cat2', 'cat3']
+        assert self.cdf.cat_cols == {'cat3': ['PfqAFgzlr', 'thYMdEL'],
+                                     'cat2': ['bcqclFkuK', 'fHCUMX'],
+                                     'cat1': ['SLscfDLKQ', 'lX']}
 
         # assert num_cols
         assert sorted(self.cdf.num_cols) == sorted([
@@ -127,7 +149,43 @@ class TestCleanDataFrame:
                 f'int{x}' for x in [8, 16, 32, 64]] + [f'float{x}' for x
                                                        in [16, 32, 64]])
 
-    def test_clean_method(self):
+    def test_clean_method_with_false_drop_nan(self):
+        self.cdf.clean(min_missing_ratio=0.08, drop_nan=False)
+        # assert the attributes which has changed after cleaning
+        # assert unique_val_cols
+        assert self.cdf.unique_val_cols == []
+
+        # assert duplicate_inds
+        assert self.cdf.duplicate_inds == []
+
+        # assert cols_to_optimize
+        assert self.cdf.cols_to_optimize == {
+            'uint8': np.uint8, 'uint16': np.uint16, 'uint32': np.uint32,
+            'uint64': np.uint64, 'int8': np.int8, 'int16': np.int16,
+            'int32': np.int32, 'int64': np.int64, 'float16': np.float16,
+            'float32': np.float32}
+        # assert outliers
+        assert self.cdf.outliers == {
+            'uint8': [0, 2, 2, 1.94],  'uint16': [6, 2, 8, 7.77],
+            'uint32': [6, 5, 11, 10.68], 'uint64': [1, 5, 6, 5.83],
+            'int8': [4, 0, 4, 3.88], 'int16': [0, 1, 1, 0.97],
+            'int32': [5, 5, 10, 9.71], 'int64': [6, 2, 8, 7.77],
+            'float16': [4, 5, 9, 8.74], 'float32': [8, 0, 8, 7.77],
+            'float64': [3, 6, 9, 8.74]}
+        # assert missing_cols
+        assert self.cdf.missing_cols == {
+            'uint8': [4, 3.88], 'uint32': [6, 5.83], 'int16': [2, 1.94],
+            'int32': [8, 7.77], 'date': [3, 2.91], 'str2': [6, 5.83]}
+        # assert cat_cols
+        assert self.cdf.cat_cols == {'cat2': ['bcqclFkuK', 'fHCUMX'],
+                                     'cat1': ['SLscfDLKQ', 'lX']}
+        # assert num_cols
+        assert sorted(self.cdf.num_cols) == sorted([
+            f'uint{x}' for x in [8, 16, 32, 64]] + [
+                f'int{x}' for x in [8, 16, 32, 64]] + [f'float{x}' for x
+                                                       in [16, 32, 64]])
+
+    def test_clean_method_with_true_drop_nan(self):
         self.cdf.clean(min_missing_ratio=0.08)
         # assert the attributes which has changed after cleaning
         # assert unique_val_cols
@@ -142,22 +200,20 @@ class TestCleanDataFrame:
             'uint64': np.uint64, 'int8': np.int8, 'int16': np.int16,
             'int32': np.int32, 'int64': np.int64, 'float16': np.float16,
             'float32': np.float32}
-
         # assert outliers
         assert self.cdf.outliers == {
-            'uint8': [0, 4, 4, 5.06],  'uint16': [1, 2, 3, 3.8],
-            'uint32': [4, 4, 8, 10.13], 'uint64': [4, 4, 8, 10.13],
-            'int8': [4, 2, 6, 7.59], 'int16': [0, 1, 1, 1.27],
-            'int32': [2, 4, 6, 7.59], 'int64': [1, 2, 3, 3.8],
-            'float16': [2, 4, 6, 7.59], 'float32': [3, 1, 4, 5.06],
-            'float64': [0, 5, 5, 6.33]}
-
+            'uint8': [0, 2, 2, 1.94],  'uint16': [6, 2, 8, 7.77],
+            'uint32': [6, 5, 11, 10.68], 'uint64': [1, 5, 6, 5.83],
+            'int8': [4, 0, 4, 3.88], 'int16': [0, 1, 1, 0.97],
+            'int32': [5, 5, 10, 9.71], 'int64': [6, 2, 8, 7.77],
+            'float16': [4, 5, 9, 8.74], 'float32': [8, 0, 8, 7.77],
+            'float64': [3, 6, 9, 8.74]}
         # assert missing_cols
         assert self.cdf.missing_cols == {}
 
         # assert cat_cols
-        assert sorted(self.cdf.cat_cols) == ['cat1', 'cat2']
-
+        assert self.cdf.cat_cols == {'cat2': ['bcqclFkuK', 'fHCUMX'],
+                                     'cat1': ['SLscfDLKQ', 'lX']}
         # assert num_cols
         assert sorted(self.cdf.num_cols) == sorted([
             f'uint{x}' for x in [8, 16, 32, 64]] + [
@@ -179,18 +235,18 @@ class TestCleanDataFrame:
 
         # assert outliers
         assert self.cdf.outliers == {
-            'uint8': [0, 4, 4, 5.06],  'uint16': [1, 2, 3, 3.8],
-            'uint32': [4, 4, 8, 10.13], 'uint64': [4, 4, 8, 10.13],
-            'int8': [4, 2, 6, 7.59], 'int16': [0, 1, 1, 1.27],
-            'int32': [2, 4, 6, 7.59], 'int64': [1, 2, 3, 3.8],
-            'float16': [2, 4, 6, 7.59], 'float32': [3, 1, 4, 5.06],
-            'float64': [0, 5, 5, 6.33]}
+            'uint8': [0, 2, 2, 1.94],  'uint16': [6, 2, 8, 7.77],
+            'uint32': [6, 5, 11, 10.68], 'uint64': [1, 5, 6, 5.83],
+            'int8': [4, 0, 4, 3.88], 'int16': [0, 1, 1, 0.97],
+            'int32': [5, 5, 10, 9.71], 'int64': [6, 2, 8, 7.77],
+            'float16': [4, 5, 9, 8.74], 'float32': [8, 0, 8, 7.77],
+            'float64': [3, 6, 9, 8.74]}
 
         # assert missing_cols
         assert self.cdf.missing_cols == {}
 
         # assert cat_cols
-        assert sorted(self.cdf.cat_cols) == []
+        assert self.cdf.cat_cols == {}
 
         # assert num_cols
         assert sorted(self.cdf.num_cols) == sorted([
