@@ -14,7 +14,7 @@ clean_df
 
 .. image:: https://img.shields.io/pypi/l/clean_df.svg
    :target: https://github.com/NaelAqel/clean_df/blob/main/LICENSE  
-
+  
   
   
 Python module to report, clean, and optimize **Pandas Dataframes** effectively.
@@ -29,11 +29,14 @@ The first step of any data analysis project is to check and clean the data, in t
 
 * Report your **Pandas DataFrame** to decide for actions, this report will show:  
 
-  #. The column which has a unique value.
-  #. The duplicated rows.
-  #. The datatypes of columns that can optimize memory (based on columns' values).
-  #. The outliers.
-  #. The missing values (table, matrix, and heatmap).
+  #. Columns with unique value report.
+  #. Duplicated rows report.
+  #. Columns’ Datatype to optimize memory report.
+  #. Columns to convert to categorical report.
+  #. Outliers report.
+  #. Missing values report.
+
+
 
 * Clean the dataframe by dropping columns that have a high ratio of missing values, rows with missing values, and duplicated rows in the dataframe.
 
