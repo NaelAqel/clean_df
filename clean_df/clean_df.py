@@ -180,6 +180,12 @@ class CleanDataFrame:
         self._df = value
         self._update()
 
+    # add this setter to update all attributes if we change column names
+    def __setattr__(self, name, value):
+        object.__setattr__(self, name, value)
+        if name == 'df' or name in self._df.columns:
+            self._update()
+
     @property
     def max_num_cat(self) -> int:
         """
