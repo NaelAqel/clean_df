@@ -49,8 +49,9 @@ class CleanDataFrame:
         details} format, the list has:
             - The total number of missing values
             - The percentage of the total values that are missing
-    cat_cols : list of str, readonly
-        List of columns that can be converted to categorical type.
+    cat_cols : dict, readonly
+        A dictionary for columns that can convert to categiorical type as
+        {column name: list of unique values} format.
     num_cols : list of str, readonly
         List of numerical columns.
 
@@ -72,8 +73,9 @@ class CleanDataFrame:
             1. Columns with unique value report.
             2. Duplicated rows report.
             3. Columns' Datatype to optimize memory report.
-            4. Outliers report.
-            5. Missing values report.
+            4. Columns to convert to categorical report.
+            5. Outliers report.
+            6. Missing values report.
         Each report will have a text message, then show a dataframe or plots
         if applicable.
 
@@ -335,9 +337,10 @@ class CleanDataFrame:
         cols_without_cat = list(set(self._used_cols).difference(
             set(cols_cat_type)))
         # list all columns that can be categorical
-        self._cat_cols = [col for col in cols_without_cat if (
+        self._cat_cols = {col: [*np.unique(self._df_dict[col])]
+                          for col in cols_without_cat if (
             self._df[col].dtype == 'O') and len(
-                set(self._df_dict[col])) <= self._max_num_cat]
+            set(self._df_dict[col])) <= self._max_num_cat}
         # list numerical columns that are not in unique_val_cols (note: numpy
         # considered datatime as numerical, so we exclude it datatime)
         self._num_cols = [col for col in cols_without_cat if np.issubdtype(
@@ -372,8 +375,9 @@ class CleanDataFrame:
             1. Columns with unique value report.
             2. Duplicated rows report.
             3. Columns' Datatype to optimize memory report.
-            4. Outliers report.
-            5. Missing values report.
+            4. Columns to convert to categorical report.
+            5. Outliers report.
+            6. Missing values report.
         Each report will have a text message, then show a dataframe or plots
         if applicable.
 
@@ -432,15 +436,23 @@ class CleanDataFrame:
         # print section header
         print(' Optimization Columns '.center(79, '='))
         # call reporting function
-        report_num, report_cat, data_num = self._optimization_report()
-        # print numerical columns report
-        print(report_num)
+        report_optimize, data_optimize = self._optimization_report()
+        # print optimization columns report
+        print(report_optimize)
         # print data if applicable
-        if data_num is not None:
-            display(data_num)
-        # print categorical report if applicable
-        if report_cat is not None:
-            print(report_cat)
+        if data_optimize is not None:
+            display(data_optimize)
+        print('\n')
+
+        # ~~~~~~ Categorical Columns Report ~~~~~~
+        print(' Categorical Columns '.center(79, '='))
+        # call reporting function
+        report_cat, data_cat = self._cat_report()
+        # print categorical columns report
+        print(report_cat)
+        # print data if applicable
+        if data_cat is not None:
+            display(data_cat)
         print('\n')
 
         # ~~~~~~ Outliers Report ~~~~~~
@@ -534,17 +546,40 @@ class CleanDataFrame:
         # if there are columns to drop, drop them and update attributes
         if len(dropped_cols) > 0:
             df_copy.drop(columns=dropped_cols, inplace=True, **drop_kws)
+            # update all related attributes
+            self._unique_val_cols = []
+            self._used_cols = list(set(self._used_cols).difference(set(
+                dropped_cols)))
+            # to make sure that _used_cols is the same df order
+            self._used_cols = [col for col in self._df.columns
+                               if col in self._used_cols]
+            self._num_cols = list(set(self._num_cols).difference(set(
+                dropped_cols)))
+            for col in dropped_cols:
+                self._df_dict.pop(col, None)
+                self._cat_cols.pop(col, None)
+                self._cols_to_optimize.pop(col, None)
+                self._outliers.pop(col, None)
+                self._missing_cols.pop(col, None)
 
         # if there are duplicated rows, drop them and update attribute
         if df_copy.duplicated().sum() > 0:
             df_copy.drop_duplicates(inplace=True, **drop_duplicates_kws)
+            # update related attributes
+            self._duplicate_inds = [*df_copy[df_copy.duplicated(keep=False)
+                                             ].index]
+            self._outliers = {
+                col: iqr(self._df[col].values) for col in self._num_cols
+                if iqr(self._df[col].values) is not None}
 
         # if drop_nan is True, drop any row with nans
         if drop_nan:
             df_copy.dropna(inplace=True)
+            # clear _missing_cols
+            self._missing_cols = {}
 
         # update df attribute
-        self.df = df_copy
+        self._df = df_copy
 
     def optimize(self) -> None:
         """
@@ -561,7 +596,7 @@ class CleanDataFrame:
             # if there are columns to optimize, convert them to the optimized
             # data types, after copyting our dataframe
             df_copy = self._df.copy()
-            cols_to_optimize = self._cols_to_optimize.keys()
+            cols_to_optimize = [*self._cols_to_optimize.keys()]
             if len(cols_to_optimize) > 0:
                 # check if columns have missings
                 num_cols_missing = [
@@ -579,13 +614,17 @@ class CleanDataFrame:
                 for col in cols_to_optimize:
                     df_copy[col] = df_copy[col].values.astype(
                         self._cols_to_optimize[col])
+                    self._cols_to_optimize.pop(col)
+
             # if there are categorical columns, covert them to df_copy
-            if len(self._cat_cols) > 0:
+            if len(self._cat_cols.keys()) > 0:
                 # convert to categorical
-                for col in self._cat_cols:
+                for col in [*self._cat_cols.keys()]:
                     df_copy[col] = df_copy[col].astype('category')
+                    # update _cat_cols by removing col
+                    self._cat_cols.pop(col)
             # now we will update df attribute
-            self.df = df_copy
+            self._df = df_copy
 
     def _unique_val_report(self) -> str:
         """
@@ -643,8 +682,7 @@ class CleanDataFrame:
         # return the duplicated full report
         return msg, data
 
-    def _optimization_report(self) -> Tuple[str, Optional[str],
-                                            Optional[pd.DataFrame]]:
+    def _optimization_report(self) -> Tuple[str, Optional[pd.DataFrame]]:
         """
         Reports the columns that can change datatypes for optimization.
 
@@ -653,46 +691,71 @@ class CleanDataFrame:
         msg: str
             A string contains a `header` which explaining the report purpose
             and a `body` that show the details (as per the availability of
-            categorical columns to optimize).
+            numerical columns to optimize).
         data: pandas.DataFrame or None
             A dataframe of columns optimization datatype details, or None if
             no columns to optimize.
         """
         # define report header
         header = '- Checking datatypes to optimize memory ... '
-        # assain data, msg_cat as None
-        data, msg_cat = None, None
 
         # Checking if we have numeraical columns to optimize
-        # Or columns that can be categorical
-        if (self._cols_to_optimize != {}) | (len(self._cat_cols) > 0):
-            # check if there are columns to optimize to put in body
-            if self._cols_to_optimize != {}:
-                # assign body
-                body = '\nThese numarical columns can be down graded:'
-                # convert data types as
-                # {data type: list of columns that can convert to this type}
-                optimize_dict = {
-                    re.findall('\\.(\\w*)', str(to_type))[0]: ', '.join(
-                        [col for col in self._cols_to_optimize.keys()
-                         if self._cols_to_optimize[col] == to_type])
-                    for to_type in set(self._cols_to_optimize.values())}
-                # convert optimize_dict to dataframe and assign to data
-                data = pd.DataFrame.from_dict(
-                    optimize_dict, orient='index', columns=['columns'])
-            if len(self._cat_cols) > 0:
-                # if there are columns can be categorical, assign msg_cat
-                msg_cat = ('\nThese columns can be converted to categorical:'
-                           f' {self._cat_cols}.')
+        if self._cols_to_optimize != {}:
+            # assign body
+            body = '\nThese numarical columns can be down graded:'
+            # convert data types as
+            # {data type: list of columns that can convert to this type}
+            optimize_dict = {
+                re.findall('\\.(\\w*)', str(to_type))[0]: ', '.join(
+                    [col for col in self._cols_to_optimize.keys()
+                     if self._cols_to_optimize[col] == to_type])
+                for to_type in set(self._cols_to_optimize.values())}
+            # convert optimize_dict to dataframe and assign to data
+            data = pd.DataFrame.from_dict(
+                optimize_dict, orient='index', columns=['columns'])
         else:
-            # if no optimization, we will change msg, so when return, this
-            # message will appear
             body = 'No columns to optimize.'
+            data = None
 
         # collect the msg from header and body
         msg = header + body
-        # return the optimization full report
-        return msg, msg_cat, data
+        # return the optimization report
+        return msg, data
+
+    def _cat_report(self) -> Tuple[str, Optional[pd.DataFrame]]:
+        """
+        Reports the columns that can change to categorical for optimization.
+
+        Returns
+        -------
+        msg: str
+            A string contains a `header` which explaining the report purpose
+            and a `body` that show the details (as per the availability of
+            categorical columns to optimize).
+        data: pandas.DataFrame or None
+            A dataframe of categorical columns with its unique values, or None
+            if no columns to be converted.
+        """
+        # define report header
+        header = '- Checking columns that can convert to categorical ... '
+
+        # Checking if we have string columns to convert
+        if self._cat_cols != {}:
+            # assign body
+            body = '\nThese columns can be converted to categorical:'
+            # convert cat_cols to dataframe and assign to data
+            cat_cols_dict = {col: ', '.join(self._cat_cols[col])
+                             for col in self._cat_cols.keys()}
+            data = pd.DataFrame.from_dict(cat_cols_dict, orient='index',
+                                          columns=['unique_values'])
+        else:
+            body = 'No columns to optimize.'
+            data = None
+
+        # collect the msg from header and body
+        msg = header + body
+        # return the optimization report
+        return msg, data
 
     def _outliers_report(self) -> Tuple[str, Optional[pd.DataFrame]]:
         """
