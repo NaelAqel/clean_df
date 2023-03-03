@@ -63,7 +63,9 @@ The module has only one class ``CleanDataFrame``, we will assign it to variable 
                         max_num_cat=20     # maximum number of unique values in a column to be 
                         )                  # converted to categorical datatype, we will choose 20
                                            
-                        
+        Founded useless columns (with single value) ... [Unnamed: 27] columns dropped.
+
+Our class dropped the column ``Unnamed: 27`` automatically because it has one value only (useless).
 
 Reporting
 ---------
@@ -76,10 +78,6 @@ Now, we can start apply the methods, first lets see the report about dataset::
                 matrix_kws={},      # if need to pass any arguments to matrix plot, default is {}
                 heat_kws={}         # if need to pass any arguments to heat plot, default is {}
                 )
-
-        ============================= Unique Value Columns ============================
-        - Checking if any column has a unique value ... 
-        These columns has one value: ['Unnamed: 27'] 
 
         =============================== Duplicated Rows ===============================
         - Checking if data frame has duplicated rows ... 
@@ -102,12 +100,11 @@ Now, we can start apply the methods, first lets see the report about dataset::
         These numarical columns can be down graded:
         
                 columns
-        int16 	ARR_DELAY, CRS_ELAPSED_TIME, DEP_DELAY
-        uint8 	CANCELLED, DIVERTED, TAXI_OUT
-        uint16 	CRS_ARR_TIME, OP_CARRIER_FL_NUM, WHEELS_OFF, CARRIER_DELAY, DEP_TIME, LATE_AIRCRAFT_DELAY, NAS_DELAY,
-                DISTANCE, CRS_DEP_TIME, SECURITY_DELAY, ACTUAL_ELAPSED_TIME, ARR_TIME, AIR_TIME, WHEELS_ON, TAXI_IN,
-                WEATHER_DELAY
-
+        int16 	DEP_DELAY, ARR_DELAY, CRS_ELAPSED_TIME
+        uint8 	TAXI_OUT, CANCELLED, DIVERTED
+        uint16 	OP_CARRIER_FL_NUM, CRS_DEP_TIME, DEP_TIME, WHEELS_OFF, WHEELS_ON, TAXI_IN, CRS_ARR_TIME, ARR_TIME, 
+                ACTUAL_ELAPSED_TIME, AIR_TIME, DISTANCE, CARRIER_DELAY, WEATHER_DELAY, NAS_DELAY, SECURITY_DELAY, 
+                LATE_AIRCRAFT_DELAY
 
 
 
@@ -124,51 +121,50 @@ Now, we can start apply the methods, first lets see the report about dataset::
         - Checking for outliers ... 
         Outliers are:  
                                 outliers_lower 	        outliers_upper 	outliers_total 	outliers_percentage
-        DEP_DELAY        	3058     	        937650   	940708 	        13.04
-        ARR_DELAY 	        9874     	        642724 	        652598  	9.05
-        DISTANCE         	0                	432362  	432362 	        5.99
-        TAXI_IN 	        0 	                428981 	        428981   	5.95
-        TAXI_OUT         	0               	411112  	411112 	        5.70
-        CRS_ELAPSED_TIME 	5 	                395338 	        395343  	5.48
-        AIR_TIME 	        0       	        391119  	391119 	        5.42
-        ACTUAL_ELAPSED_TIME 	0        	        371247 	        371247  	5.15
-        CARRIER_DELAY 	        0               	155876  	155876 	        2.16
-        LATE_AIRCRAFT_DELAY 	0 	                132029 	        132029  	1.83
-        CANCELLED        	0                    	116584  	116584 	        1.62
-        NAS_DELAY 	        0 	                100224 	        100224  	1.39
-        WEATHER_DELAY    	0              	        85055   	85055 	        1.18
-        DIVERTED 	        0 	                17859 	        17859    	0.25
-        SECURITY_DELAY 	        0       	        4348 	        4348 	        0.06
+        DEP_DELAY        	3058.0     	        937650.0   	940708.0        13.26
+        ARR_DELAY 	        9874.0     	        642724.0        652598.0  	9.22
+        DISTANCE         	0.0                	432362.0  	432362.0        5.99
+        TAXI_IN 	        0.0 	                428981.0        428981.0   	6.05
+        TAXI_OUT         	0.0               	411112.0  	411112.0        5.79
+        CRS_ELAPSED_TIME 	5.0 	                395338.0        395343.0  	5.48
+        AIR_TIME 	        0.0       	        391119.0  	391119.0        5.53
+        ACTUAL_ELAPSED_TIME 	0.0        	        371247.0        371247.0  	5.24
+        CARRIER_DELAY 	        0.0               	155876.0  	155876.0        11.52
+        LATE_AIRCRAFT_DELAY 	0.0 	                132029.0        132029.0  	9.76
+        CANCELLED        	0.0                    	116584.0  	116584.0        1.62
+        NAS_DELAY 	        0.0 	                100224.0        100224.0  	7.41
+        WEATHER_DELAY    	0.0              	85055.0   	85055.0	        6.29
+        DIVERTED 	        0.0 	                17859.0	        17859.0    	0.25
+        SECURITY_DELAY 	        0.0       	        4348.0 	        4348.0 	        0.32
 
 
         ================================ Missing Values ===============================
         - Checking for missing values ... 
         Missing details are:
                                 missing_counts 	missing_percentage
-        CANCELLATION_CODE 	7096866 	98.38
-        CARRIER_DELAY    	5860740 	81.25
-        SECURITY_DELAY 	        5860740 	81.25
-        NAS_DELAY        	5860740 	81.25
-        WEATHER_DELAY 	        5860740 	81.25
-        LATE_AIRCRAFT_DELAY 	5860740 	81.25
-        ARR_DELAY        	137040   	1.90
-        ACTUAL_ELAPSED_TIME 	134442 	        1.86
-        AIR_TIME         	134442   	1.86
-        TAXI_IN 	        119246 	        1.65
-        WHEELS_ON        	119246  	1.65
-        ARR_TIME 	        119245 	        1.65
-        DEP_DELAY       	117234  	1.63
-        TAXI_OUT 	        115830 	        1.61
-        WHEELS_OFF      	115829  	1.61
-        DEP_TIME 	        112317 	        1.56
-        CRS_ELAPSED_TIME 	10 	        0.00
+        CANCELLATION_CODE 	7096866.0 	98.38
+        CARRIER_DELAY    	5860740.0 	81.25
+        SECURITY_DELAY 	        5860740.0 	81.25
+        NAS_DELAY        	5860740.0 	81.25
+        WEATHER_DELAY 	        5860740.0 	81.25
+        LATE_AIRCRAFT_DELAY 	5860740.0 	81.25
+        ARR_DELAY        	137040.0   	1.90
+        ACTUAL_ELAPSED_TIME 	134442.0        1.86
+        AIR_TIME         	134442.0   	1.86
+        TAXI_IN 	        119246.0        1.65
+        WHEELS_ON        	119246.0  	1.65
+        ARR_TIME 	        119245.0        1.65
+        DEP_DELAY       	117234.0  	1.63
+        TAXI_OUT 	        115830.0        1.61
+        WHEELS_OFF      	115829.0  	1.61
+        DEP_TIME 	        112317.0        1.56
+        CRS_ELAPSED_TIME 	10.0 	        0.00
 
 .. image:: 1.png
 .. image:: 2.png
 
 
 The report shows that:
-  #. The column 'Unnamed: 27' has a unique value.
   #. 7 duplicated rows.
   #. For optimization we can convert 16 columns to `uint16`, 3 columns to `uint8`, 3 columns to `int16`, and 2 columns to `categorical` datatypes.
   #. 15 columns have outliers as detailed above.
@@ -187,8 +183,6 @@ To clean the dataframe (remove missing, unique value columns and duplication)::
                 )
         >>> cdf.report()                   # to see the changes
 
-        ============================= Unique Value Columns ============================
-        - Checking if any column has a unique value ... No columns founded. 
 
         =============================== Duplicated Rows ===============================
         - Checking if data frame has duplicated rows ... No duplications.
@@ -199,10 +193,10 @@ To clean the dataframe (remove missing, unique value columns and duplication)::
         These numarical columns can be down graded:
 
                 columns
-        int16 	ARR_DELAY, CRS_ELAPSED_TIME, DEP_DELAY
-        uint8 	CANCELLED, DIVERTED, TAXI_OUT
-        uint16 	CRS_ARR_TIME, OP_CARRIER_FL_NUM, WHEELS_OFF, DEP_TIME, DISTANCE, CRS_DEP_TIME, ACTUAL_ELAPSED_TIME,
-                ARR_TIME, AIR_TIME, WHEELS_ON, TAXI_IN,
+        int16 	DEP_DELAY, ARR_DELAY, CRS_ELAPSED_TIME
+        uint8 	TAXI_OUT, CANCELLED, DIVERTED 
+        uint16 	OP_CARRIER_FL_NUM, CRS_DEP_TIME, DEP_TIME, WHEELS_OFF, WHEELS_ON, TAXI_IN, CRS_ARR_TIME, ARR_TIME, 
+                ACTUAL_ELAPSED_TIME, AIR_TIME, DISTANCE
 
 
         ============================= Categorical Columns =============================
@@ -219,16 +213,14 @@ To clean the dataframe (remove missing, unique value columns and duplication)::
         Outliers are:
 
                                 outliers_lower 	        outliers_upper 	outliers_total 	outliers_percentage
-        DEP_DELAY        	3058     	        937650   	940708 	        13.04
-        ARR_DELAY 	        9874     	        642724 	        652598  	9.05
-        DISTANCE         	0                	432362  	432362 	        5.99
-        TAXI_IN 	        0 	                428981 	        428981   	5.95
-        TAXI_OUT         	0               	411112  	411112 	        5.70
-        CRS_ELAPSED_TIME 	5 	                395338 	        395343  	5.48
-        AIR_TIME 	        0       	        391119  	391119 	        5.42
-        ACTUAL_ELAPSED_TIME 	0        	        371247 	        371247  	5.15
-        CANCELLED        	0                    	116584  	116584 	        1.62
-        DIVERTED 	        0 	                17859 	        17859    	0.25
+        DEP_DELAY 	        3048.0           	931179.0 	934227.0 	13.21
+        ARR_DELAY        	9869.0 	                642674.0 	652543.0 	9.23
+        DISTANCE 	        0.0              	427251.0 	427251.0 	6.04
+        TAXI_IN          	0.0              	426694.0 	426694.0 	6.03
+        TAXI_OUT 	        0.0             	408062.0 	408062.0 	5.77
+        AIR_TIME 	        0.0 	                391119.0 	391119.0 	5.53
+        CRS_ELAPSED_TIME 	1.0             	390605.0 	390606.0 	5.52
+        ACTUAL_ELAPSED_TIME 	0.0 	                371246.0 	371246.0 	5.25
 
 
 
@@ -263,16 +255,14 @@ To optimize the dataframe (convert datatypes)::
         Outliers are:
 
                                 outliers_lower 	        outliers_upper 	outliers_total 	outliers_percentage
-        DEP_DELAY        	3058     	        937650   	940708 	        13.04
-        ARR_DELAY 	        9874     	        642724 	        652598  	9.05
-        DISTANCE         	0                	432362  	432362 	        5.99
-        TAXI_IN 	        0 	                428981 	        428981   	5.95
-        TAXI_OUT         	0               	411112  	411112 	        5.70
-        CRS_ELAPSED_TIME 	5 	                395338 	        395343  	5.48
-        AIR_TIME 	        0       	        391119  	391119 	        5.42
-        ACTUAL_ELAPSED_TIME 	0        	        371247 	        371247  	5.15
-        CANCELLED        	0                    	116584  	116584 	        1.62
-        DIVERTED 	        0 	                17859 	        17859    	0.25
+        DEP_DELAY 	        3048.0           	931179.0 	934227.0 	13.21
+        ARR_DELAY        	9869.0 	                642674.0 	652543.0 	9.23
+        DISTANCE 	        0.0              	427251.0 	427251.0 	6.04
+        TAXI_IN          	0.0              	426694.0 	426694.0 	6.03
+        TAXI_OUT 	        0.0             	408062.0 	408062.0 	5.77
+        AIR_TIME 	        0.0 	                391119.0 	391119.0 	5.53
+        CRS_ELAPSED_TIME 	1.0             	390605.0 	390606.0 	5.52
+        ACTUAL_ELAPSED_TIME 	0.0 	                371246.0 	371246.0 	5.25
 
 
 
