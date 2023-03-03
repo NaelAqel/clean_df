@@ -106,14 +106,13 @@ def iqr(arr) -> Optional[list]:
 
     Returns
     -------
-    list or None
-        A list containing:
+    numpy ndarray or None
+        A numpy array containing:
             - int: The number of lower outliers
             - int: The number of upper outliers
             - int: The total number of outliers
             - float: The percentage of outliers to total values of array
         Or None if there are no outliers
-    :rtype: list or None
     """
     # check if input is not an array
     if not isinstance(arr, np.ndarray):
@@ -132,9 +131,9 @@ def iqr(arr) -> Optional[list]:
 
     # if there are outliers, return them as described in doc_string
     if lower_fence + upper_fence > 0:
-        return [
+        return np.array([
             lower_fence,
             upper_fence,
             lower_fence + upper_fence,
             round((lower_fence + upper_fence) * 100 / len(arr), 2)
-        ]
+        ])

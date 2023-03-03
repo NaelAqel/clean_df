@@ -110,11 +110,8 @@ class TestCleanDataFrame:
         # assert max_num_cat
         assert self.cdf.max_num_cat == 5
 
-        # assert unique_val_cols
-        assert self.cdf.unique_val_cols == ['single_value', 'all_missing']
-
         # assert duplicate_inds
-        assert self.cdf.duplicate_inds == [1, 2, 100, 101, 102]
+        assert all(self.cdf.duplicate_inds == [1, 2, 100, 101, 102])
 
         # assert cols_to_optimize
         assert self.cdf.cols_to_optimize == {
@@ -124,39 +121,54 @@ class TestCleanDataFrame:
             'float32': np.float32}
 
         # assert outliers
-        assert self.cdf.outliers == {
-            'uint8': [0, 2, 2, 1.94],  'uint16': [6, 2, 8, 7.77],
-            'uint32': [6, 5, 11, 10.68], 'uint64': [1, 5, 6, 5.83],
-            'int8': [4, 0, 4, 3.88], 'int16': [0, 1, 1, 0.97],
-            'int32': [5, 5, 10, 9.71], 'int64': [6, 2, 8, 7.77],
+        true_vals = {
+            'uint8': [0, 2, 2, 2.02],  'uint16': [6, 2, 8, 7.77],
+            'uint32': [6, 5, 11, 11.34], 'uint64': [1, 5, 6, 5.83],
+            'int8': [4, 0, 4, 3.88], 'int16': [0, 1, 1, 0.99],
+            'int32': [5, 5, 10, 10.53], 'int64': [6, 2, 8, 7.77],
             'float16': [4, 5, 9, 8.74], 'float32': [8, 0, 8, 7.77],
             'float64': [3, 6, 9, 8.74]}
+        # check the keys are equal
+        assert sorted([*true_vals.keys()]) == sorted(
+            [*self.cdf.outliers.keys()])
+        # check values
+        for col in true_vals.keys():
+            assert all(self.cdf.outliers[col] == true_vals[col])
 
         # assert missing_cols
-        assert self.cdf.missing_cols == {
+        true_vals = {
             'uint8': [4, 3.88], 'uint32': [6, 5.83], 'int16': [2, 1.94],
             'int32': [8, 7.77], 'date': [3, 2.91], 'cat3': [9, 8.74],
             'str2': [6, 5.83]}
+        # check the keys are equal
+        assert sorted([*true_vals.keys()]) == sorted(
+            [*self.cdf.missing_cols.keys()])
+        # check values
+        for col in true_vals.keys():
+            assert all(self.cdf.missing_cols[col] == true_vals[col])
 
         # assert cat_cols
-        assert self.cdf.cat_cols == {'cat3': ['PfqAFgzlr', 'thYMdEL'],
-                                     'cat2': ['bcqclFkuK', 'fHCUMX'],
-                                     'cat1': ['SLscfDLKQ', 'lX']}
+        true_vals = {'cat3': ['PfqAFgzlr', 'thYMdEL'],
+                     'cat2': ['bcqclFkuK', 'fHCUMX'],
+                     'cat1': ['SLscfDLKQ', 'lX']}
+        # check the keys are equal
+        assert sorted([*true_vals.keys()]) == sorted(
+            [*self.cdf.cat_cols.keys()])
+        # check values
+        for col in true_vals.keys():
+            assert all(self.cdf.cat_cols[col] == true_vals[col])
 
         # assert num_cols
-        assert sorted(self.cdf.num_cols) == sorted([
+        assert all(np.sort(self.cdf.num_cols) == np.sort(np.array([
             f'uint{x}' for x in [8, 16, 32, 64]] + [
                 f'int{x}' for x in [8, 16, 32, 64]] + [f'float{x}' for x
-                                                       in [16, 32, 64]])
+                                                       in [16, 32, 64]])))
 
     def test_clean_method_with_false_drop_nan(self):
-        self.cdf.clean(min_missing_ratio=0.08, drop_nan=False)
+        self.cdf.clean(min_missing_ratio=0.085, drop_nan=False)
         # assert the attributes which has changed after cleaning
-        # assert unique_val_cols
-        assert self.cdf.unique_val_cols == []
-
         # assert duplicate_inds
-        assert self.cdf.duplicate_inds == []
+        assert len(self.cdf.duplicate_inds) == 0
 
         # assert cols_to_optimize
         assert self.cdf.cols_to_optimize == {
@@ -164,35 +176,54 @@ class TestCleanDataFrame:
             'uint64': np.uint64, 'int8': np.int8, 'int16': np.int16,
             'int32': np.int32, 'int64': np.int64, 'float16': np.float16,
             'float32': np.float32}
+
         # assert outliers
-        assert self.cdf.outliers == {
-            'uint8': [0, 2, 2, 1.94],  'uint16': [6, 2, 8, 7.77],
-            'uint32': [6, 5, 11, 10.68], 'uint64': [1, 5, 6, 5.83],
-            'int8': [4, 0, 4, 3.88], 'int16': [0, 1, 1, 0.97],
-            'int32': [5, 5, 10, 9.71], 'int64': [6, 2, 8, 7.77],
-            'float16': [4, 5, 9, 8.74], 'float32': [8, 0, 8, 7.77],
-            'float64': [3, 6, 9, 8.74]}
+        true_vals = {
+            'uint8': [0, 2, 2, 2],  'uint16': [3, 2, 5, 5],
+            'uint32': [5, 5, 10, 10], 'uint64': [2, 5, 7, 7],
+            'int8': [3, 0, 3, 3], 'int16': [0, 1, 1, 1],
+            'int32': [3, 5, 8, 8], 'int64': [3, 2, 5, 5],
+            'float16': [4, 5, 9, 9], 'float32': [5, 1, 6, 6],
+            'float64': [1, 6, 7, 7]}
+        # check the keys are equal
+        assert sorted([*true_vals.keys()]) == sorted(
+            [*self.cdf.outliers.keys()])
+        # check values
+        for col in true_vals.keys():
+            assert all(self.cdf.outliers[col] == true_vals[col])
+
         # assert missing_cols
-        assert self.cdf.missing_cols == {
-            'uint8': [4, 3.88], 'uint32': [6, 5.83], 'int16': [2, 1.94],
-            'int32': [8, 7.77], 'date': [3, 2.91], 'str2': [6, 5.83]}
+        true_vals = {
+            'uint8': [3, 3], 'uint32': [4, 4], 'int16': [2, 2],
+            'int32': [8, 8], 'date': [3, 3], 'str2': [6, 6]}
+        # check the keys are equal
+        assert sorted([*true_vals.keys()]) == sorted(
+            [*self.cdf.missing_cols.keys()])
+        # check values
+        for col in true_vals.keys():
+            assert all(self.cdf.missing_cols[col] == true_vals[col])
+
         # assert cat_cols
-        assert self.cdf.cat_cols == {'cat2': ['bcqclFkuK', 'fHCUMX'],
-                                     'cat1': ['SLscfDLKQ', 'lX']}
+        true_vals = {'cat2': ['bcqclFkuK', 'fHCUMX'],
+                     'cat1': ['SLscfDLKQ', 'lX']}
+        # check the keys are equal
+        assert sorted([*true_vals.keys()]) == sorted(
+            [*self.cdf.cat_cols.keys()])
+        # check values
+        for col in true_vals.keys():
+            assert all(self.cdf.cat_cols[col] == true_vals[col])
+
         # assert num_cols
-        assert sorted(self.cdf.num_cols) == sorted([
+        assert all(np.sort(self.cdf.num_cols) == np.sort(np.array([
             f'uint{x}' for x in [8, 16, 32, 64]] + [
                 f'int{x}' for x in [8, 16, 32, 64]] + [f'float{x}' for x
-                                                       in [16, 32, 64]])
+                                                       in [16, 32, 64]])))
 
     def test_clean_method_with_true_drop_nan(self):
-        self.cdf.clean(min_missing_ratio=0.08)
+        self.cdf.clean(min_missing_ratio=0.085)
         # assert the attributes which has changed after cleaning
-        # assert unique_val_cols
-        assert self.cdf.unique_val_cols == []
-
         # assert duplicate_inds
-        assert self.cdf.duplicate_inds == []
+        assert len(self.cdf.duplicate_inds) == 0
 
         # assert cols_to_optimize
         assert self.cdf.cols_to_optimize == {
@@ -200,47 +231,65 @@ class TestCleanDataFrame:
             'uint64': np.uint64, 'int8': np.int8, 'int16': np.int16,
             'int32': np.int32, 'int64': np.int64, 'float16': np.float16,
             'float32': np.float32}
+
         # assert outliers
-        assert self.cdf.outliers == {
-            'uint8': [0, 2, 2, 1.94],  'uint16': [6, 2, 8, 7.77],
-            'uint32': [6, 5, 11, 10.68], 'uint64': [1, 5, 6, 5.83],
-            'int8': [4, 0, 4, 3.88], 'int16': [0, 1, 1, 0.97],
-            'int32': [5, 5, 10, 9.71], 'int64': [6, 2, 8, 7.77],
-            'float16': [4, 5, 9, 8.74], 'float32': [8, 0, 8, 7.77],
-            'float64': [3, 6, 9, 8.74]}
+        true_vals = {
+            'uint8': [0, 4, 4, 5.06],  'uint16': [1, 2, 3, 3.8],
+            'uint32': [4, 4, 8, 10.13], 'uint64': [4, 4, 8, 10.13],
+            'int8': [4, 2, 6, 7.59], 'int16': [0, 1, 1, 1.27],
+            'int32': [2, 4, 6, 7.59], 'int64': [1, 2, 3, 3.8],
+            'float16': [2, 4, 6, 7.59], 'float32': [3, 1, 4, 5.06],
+            'float64': [0, 5, 5, 6.33]}
+        # check the keys are equal
+        assert sorted([*true_vals.keys()]) == sorted(
+            [*self.cdf.outliers.keys()])
+        # check values
+        for col in true_vals.keys():
+            assert all(self.cdf.outliers[col] == true_vals[col])
+
         # assert missing_cols
         assert self.cdf.missing_cols == {}
 
         # assert cat_cols
-        assert self.cdf.cat_cols == {'cat2': ['bcqclFkuK', 'fHCUMX'],
-                                     'cat1': ['SLscfDLKQ', 'lX']}
+        true_vals = {'cat2': ['bcqclFkuK', 'fHCUMX'],
+                     'cat1': ['SLscfDLKQ', 'lX']}
+        # check the keys are equal
+        assert sorted([*true_vals.keys()]) == sorted(
+            [*self.cdf.cat_cols.keys()])
+        # check values
+        for col in true_vals.keys():
+            assert all(self.cdf.cat_cols[col] == true_vals[col])
+
         # assert num_cols
-        assert sorted(self.cdf.num_cols) == sorted([
+        assert all(np.sort(self.cdf.num_cols) == np.sort(np.array([
             f'uint{x}' for x in [8, 16, 32, 64]] + [
                 f'int{x}' for x in [8, 16, 32, 64]] + [f'float{x}' for x
-                                                       in [16, 32, 64]])
+                                                       in [16, 32, 64]])))
 
     def test_optimize_method_after_call_clean_method(self):
-        self.cdf.clean(min_missing_ratio=0.08)
+        self.cdf.clean(min_missing_ratio=0.085)
         self.cdf.optimize()
         # assert the attributes which has changed after optimization
-        # assert unique_val_cols
-        assert self.cdf.unique_val_cols == []
-
         # assert duplicate_inds
-        assert self.cdf.duplicate_inds == []
+        assert len(self.cdf.duplicate_inds) == 0
 
         # assert cols_to_optimize
         assert self.cdf.cols_to_optimize == {}
 
         # assert outliers
-        assert self.cdf.outliers == {
-            'uint8': [0, 2, 2, 1.94],  'uint16': [6, 2, 8, 7.77],
-            'uint32': [6, 5, 11, 10.68], 'uint64': [1, 5, 6, 5.83],
-            'int8': [4, 0, 4, 3.88], 'int16': [0, 1, 1, 0.97],
-            'int32': [5, 5, 10, 9.71], 'int64': [6, 2, 8, 7.77],
-            'float16': [4, 5, 9, 8.74], 'float32': [8, 0, 8, 7.77],
-            'float64': [3, 6, 9, 8.74]}
+        true_vals = {
+            'uint8': [0, 4, 4, 5.06],  'uint16': [1, 2, 3, 3.8],
+            'uint32': [4, 4, 8, 10.13], 'uint64': [4, 4, 8, 10.13],
+            'int8': [4, 2, 6, 7.59], 'int16': [0, 1, 1, 1.27],
+            'int32': [2, 4, 6, 7.59], 'int64': [1, 2, 3, 3.8],
+            'float16': [2, 4, 6, 7.59], 'float32': [3, 1, 4, 5.06],
+            'float64': [0, 5, 5, 6.33]}
+        # check the keys are equal
+        assert sorted([*true_vals.keys()]) == sorted(
+            [*self.cdf.outliers.keys()])
+        # check values
+        for col in true_vals.keys():
+            assert all(self.cdf.outliers[col] == true_vals[col])
 
         # assert missing_cols
         assert self.cdf.missing_cols == {}

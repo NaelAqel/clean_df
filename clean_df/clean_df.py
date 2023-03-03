@@ -30,30 +30,28 @@ class CleanDataFrame:
     max_num_cat : int
         The maximum number of unique values in a column for it to be
         considered categorical.
-    unique_val_cols : list of str, readonly
-        List of the columns which have a unique value.
-    duplicate_inds : list of int, readonly
-        List of the indices of duplicated rows.
+    duplicate_inds : numpy ndarray, readonly
+        Array of the indices of duplicated rows.
     cols_to_optimize : dict, readonly
         A dictionary of all numerical columns that can be memory optimized, it
         will be {column name: optimized data type}.
     outliers : dict, readonly
-        A dictionary for outliers details in a list as {column name: outlier
-        details} format, the list has:
+        A dictionary for outliers details in an array as
+        {column name: outlier details} format, the list has:
             - The number of lower outliers
             - The number of upper outliers
             - The total number of outliers
             - The percentage of the total values that are outliers
     missing_cols : dict, readonly
-        A dictionary for missing details in a list as {column name: missing
-        details} format, the list has:
+        A dictionary for missing details in an array as
+        {column name: missing details} format, the list has:
             - The total number of missing values
             - The percentage of the total values that are missing
     cat_cols : dict, readonly
         A dictionary for columns that can convert to categiorical type as
-        {column name: list of unique values} format.
-    num_cols : list of str, readonly
-        List of numerical columns.
+        {column name: array of unique values} format.
+    num_cols : numpy ndarray of str, readonly
+        Array of numerical columns.
 
     Methods
     -------
@@ -70,12 +68,11 @@ class CleanDataFrame:
     report(self, show_matrix=True, show_heat=True, matrix_kws={}, \
         heat_kws={}) -> None:
         Generate a summary report of the dataset, including:
-            1. Columns with unique value report.
-            2. Duplicated rows report.
-            3. Columns' Datatype to optimize memory report.
-            4. Columns to convert to categorical report.
-            5. Outliers report.
-            6. Missing values report.
+            1. Duplicated rows report.
+            2. Columns' Datatype to optimize memory report.
+            3. Columns to convert to categorical report.
+            4. Outliers report.
+            5. Missing values report.
         Each report will have a text message, then show a dataframe or plots
         if applicable.
 
@@ -213,25 +210,13 @@ class CleanDataFrame:
 
     # all other attributes will have are read-only, so only have getter
     @property
-    def unique_val_cols(self) -> list:
-        """
-        Get the value of unique_val_cols.
-
-        Returns
-        -------
-        list
-            The value of unique_val_cols.
-        """
-        return self._unique_val_cols
-
-    @property
-    def duplicate_inds(self) -> list:
+    def duplicate_inds(self) -> np.ndarray:
         """
         Get the value of duplicate_inds.
 
         Returns
         -------
-        list
+        numpy ndarray
             The value of duplicate_inds.
         """
         return self._duplicate_inds
@@ -273,25 +258,25 @@ class CleanDataFrame:
         return self._missing_cols
 
     @property
-    def cat_cols(self) -> list:
+    def cat_cols(self) -> np.ndarray:
         """
         Get the value of cat_cols.
 
         Returns
         -------
-        list
+        numpy ndarray
             The value of cat_cols.
         """
         return self._cat_cols
 
     @property
-    def num_cols(self) -> list:
+    def num_cols(self) -> np.ndarray:
         """
         Get the value of num_cols.
 
         Returns
         -------
-        list
+        numpy ndarray
             The value of num_cols.
         """
         return self._num_cols
@@ -321,41 +306,48 @@ class CleanDataFrame:
         if (not isinstance(self._max_num_cat, int)) or self._max_num_cat < 0:
             raise ValueError("'max_num_cat' should be a positive integer.")
 
+        # save columns (in its order) in _cols_order
+        self._cols_order = np.array(self._df.columns)
+
         # Convert dataframe to dictionary after removing all missing
         self._df_dict = {col: self._df[col].replace(
-            'nan', np.nan).dropna().values for col in self._df.columns}
+            'nan', np.nan).dropna().values for col in self._cols_order}
 
         # ~~~~~ Unique value columns ~~~~~
-        self._unique_val_cols = [
-            col for col in self._df.columns
-            if len(np.unique(self._df_dict[col])) <= 1]
-        # remove unique_val_cols from df columns and save them in _used_cols
-        self._used_cols = list(set(self._df.columns).difference(
-            set(self._unique_val_cols)))
-        # to make sure that _used_cols have the same order of columns
-        self._used_cols = [col for col in self._df.columns
-                           if col in self._used_cols]
+        unique_val_cols = np.array([
+            col for col in self._cols_order
+            if len(np.unique(self._df_dict[col])) <= 1])
+        # if there are columns with only unique value, drop them and update
+        # relevent attributes
+        if len(unique_val_cols) > 0:
+            print('Founded useless columns (with single value) ... ', end='')
+            self._df.drop(columns=unique_val_cols, inplace=True)
+            print(f"[{', '.join(unique_val_cols)}] columns dropped.")
+            self._cols_order = np.setdiff1d(
+                self._cols_order, unique_val_cols, assume_unique=True)
+            for col in unique_val_cols:
+                self._df_dict.pop(col, None)
+
         # list if dataframe has columns with type 'category', to exclude it
         # as numpy can not deal with category datatype
-        cols_cat_type = [col for col in self._used_cols
-                         if self.df[col].dtype == 'category']
-        # exclude cols_cat_type columns from _used_cols
-        cols_without_cat = list(set(self._used_cols).difference(
-            set(cols_cat_type)))
+        cols_without_cat = np.array(
+            [col for col in self._cols_order
+             if self._df_dict[col].dtype != 'category'])
         # list all columns that can be categorical
-        self._cat_cols = {col: [*np.unique(self._df_dict[col])]
+        self._cat_cols = {col: np.unique(self._df_dict[col])
                           for col in cols_without_cat if (
-            self._df[col].dtype == 'O') and len(
+            self._df_dict[col].dtype == 'O') and len(
             set(self._df_dict[col])) <= self._max_num_cat}
         # list numerical columns that are not in unique_val_cols (note: numpy
         # considered datatime as numerical, so we exclude it datatime)
-        self._num_cols = [col for col in cols_without_cat if np.issubdtype(
-            self._df_dict[col].dtype.name, np.number) and not np.issubdtype(
-                self._df_dict[col].dtype.name, '<m8[ns]')]
+        self._num_cols = np.array([
+            col for col in cols_without_cat
+            if np.issubdtype(self._df_dict[col].dtype.name, np.number)
+            and not np.issubdtype(self._df_dict[col].dtype.name, '<m8[ns]')])
 
         # ~~~~~ Duplicated Rows ~~~~~
-        self._duplicate_inds = [*self._df[self._df.duplicated(keep=False)
-                                          ].index]
+        self._duplicate_inds = self._df[self._df.duplicated(keep=False)
+                                        ].index.values
 
         # ~~~~~ Optimization of Columns ~~~~~
         self._cols_to_optimize = {
@@ -364,26 +356,27 @@ class CleanDataFrame:
 
         # ~~~~~ Outliers ~~~~~
         self._outliers = {
-            col: iqr(self._df[col].values) for col in self._num_cols
-            if iqr(self._df[col].values) is not None}
+            col: iqr(self._df_dict[col]) for col in self._num_cols
+            if iqr(self._df_dict[col]) is not None}
 
         # ~~~~~ Missing Values ~~~~~
         self._missing_cols = {
-            col: [self._df[col].replace('nan', np.nan).isna().sum(),
-                  round(self._df[col].replace('nan', np.nan).isna().sum(
-                      ) * 100 / len(self._df), 2)] for col in self._used_cols
-            if self._df[col].replace('nan', np.nan).isna().sum() > 0}
+                col: np.array([
+                    pd.isna(self._df[col].values).sum(),
+                    round(pd.isna(self._df[col].values).sum(
+                    )*100 / len(self._df), 2)])
+                for col in self._cols_order
+                if pd.isna(self._df[col].values).sum() > 0}
 
     def report(self, show_matrix=True, show_heat=True, matrix_kws={},
                heat_kws={}) -> None:
         """
         Generate a summary report of the dataset, including:
-            1. Columns with unique value report.
-            2. Duplicated rows report.
-            3. Columns' Datatype to optimize memory report.
-            4. Columns to convert to categorical report.
-            5. Outliers report.
-            6. Missing values report.
+            1. Duplicated rows report.
+            2. Columns' Datatype to optimize memory report.
+            3. Columns to convert to categorical report.
+            4. Outliers report.
+            5. Missing values report.
         Each report will have a text message, then show a dataframe or plots
         if applicable.
 
@@ -417,14 +410,6 @@ class CleanDataFrame:
                 or (not isinstance(heat_kws, dict)):
             raise TypeError(
                 "'matrix_kws' and 'heat_kws' should be a dictionary.")
-
-        # ~~~~~~ Unique Value Columns Report ~~~~~~
-        # print section header
-        print(' Unique Value Columns '.center(79, '='))
-        # call reporting function
-        report_unique = self._unique_val_report()
-        # print report
-        print(report_unique, '\n')
 
         # ~~~~~~ Duplicated Rows Report ~~~~~~
         # print section header
@@ -531,7 +516,8 @@ class CleanDataFrame:
 
         # check min_missing_ratio value
         if min_missing_ratio > 1 or min_missing_ratio < 0 \
-                or (not isinstance(min_missing_ratio, float)):
+                or (not isinstance(min_missing_ratio, float)
+                    and min_missing_ratio != 1):
             raise ValueError("'min_missing_ratio' should be between 0 and 1.")
 
         # check if inplace in drop_kws or drop_duplicates_kws
@@ -541,26 +527,21 @@ class CleanDataFrame:
                 have 'inplace' value, this function will automatically \
                     inplace them. So please delete 'inplace' key.")
 
-        # define dropped_cols which are the columns to drop (unique_val_cols &
-        # missing columns with missing values ratio above min_missing_ratio)
-        dropped_cols = self._unique_val_cols + [
+        # define dropped_cols which are the columns to drop (missing columns
+        # with missing values ratio above min_missing_ratio)
+        dropped_cols = np.array([
             col for col in self._missing_cols.keys()
-            if self._missing_cols[col][1] >= 100 * min_missing_ratio]
+            if self._missing_cols[col][1] >= 100 * min_missing_ratio])
 
-        # copy dataframe to make the process
-        df_copy = self._df.copy()
         # if there are columns to drop, drop them and update attributes
         if len(dropped_cols) > 0:
-            df_copy.drop(columns=dropped_cols, inplace=True, **drop_kws)
+            self._df.drop(columns=dropped_cols, inplace=True, **drop_kws)
             # update all related attributes
-            self._unique_val_cols = []
-            self._used_cols = list(set(self._used_cols).difference(set(
-                dropped_cols)))
-            # to make sure that _used_cols is the same df order
-            self._used_cols = [col for col in self._df.columns
-                               if col in self._used_cols]
-            self._num_cols = list(set(self._num_cols).difference(set(
-                dropped_cols)))
+            # remove dropped_cols from _cols_order
+            self._cols_order = np.setdiff1d(
+                self._cols_order, dropped_cols, assume_unique=True)
+            self._num_cols = np.setdiff1d(
+                self._num_cols, dropped_cols, assume_unique=True)
             for col in dropped_cols:
                 self._df_dict.pop(col, None)
                 self._cat_cols.pop(col, None)
@@ -568,24 +549,29 @@ class CleanDataFrame:
                 self._outliers.pop(col, None)
                 self._missing_cols.pop(col, None)
 
-        # if there are duplicated rows, drop them and update attribute
-        if df_copy.duplicated().sum() > 0:
-            df_copy.drop_duplicates(inplace=True, **drop_duplicates_kws)
+        # if there are duplicated rows, or dropnan is True
+        if len(self._duplicate_inds) > 0 or drop_nan:
+            # if there is duplicated rows, drop them
+            if len(self._duplicate_inds) > 0:
+                self._df.drop_duplicates(inplace=True, **drop_duplicates_kws)
+                # update related attributes
+                self._duplicate_inds = np.array([])
+            # if drop_nan is True, drop any row with nans
+            if drop_nan:
+                self._df.dropna(inplace=True)
+                # update related attributes _missing_cols
+                self._missing_cols = {}
             # update related attributes
-            self._duplicate_inds = [*df_copy[df_copy.duplicated(keep=False)
-                                             ].index]
             self._outliers = {
                 col: iqr(self._df[col].values) for col in self._num_cols
                 if iqr(self._df[col].values) is not None}
-
-        # if drop_nan is True, drop any row with nans
-        if drop_nan:
-            df_copy.dropna(inplace=True)
-            # clear _missing_cols
-            self._missing_cols = {}
-
-        # update df attribute
-        self._df = df_copy
+            self._missing_cols = {
+                col: np.array([
+                    pd.isna(self._df[col].values).sum(),
+                    round(pd.isna(self._df[col].values).sum(
+                    )*100 / len(self._df), 2)])
+                for col in self._cols_order
+                if pd.isna(self._df[col].values).sum() > 0}
 
     def optimize(self) -> None:
         """
@@ -599,26 +585,27 @@ class CleanDataFrame:
             If any numerical column contains missing values.
         """
         if self._cols_to_optimize != {} or len(self._cat_cols) > 0:
-            # if there are columns to optimize, convert them to the optimized
-            # data types, after copyting our dataframe
-            df_copy = self._df.copy()
-            cols_to_optimize = [*self._cols_to_optimize.keys()]
-            if len(cols_to_optimize) > 0:
+            # if there are columns to optimize
+            if len(self._cols_to_optimize.keys()) > 0:
+                cols_to_optimize = self._cols_to_optimize.keys()
                 # check if columns have missings
-                num_cols_missing = [
-                    col for col in cols_to_optimize if df_copy[
-                        col].isna().sum() > 0]
+                num_cols_missing = np.array([
+                    col for col in cols_to_optimize
+                    if col in self._missing_cols.keys()])
                 # raise warning if there are missing columns
                 if len(num_cols_missing) > 0:
                     warnings.warn(f'{num_cols_missing} contains missing '
                                   f'values, it will not be optimized.',
                                   UserWarning)
                     # update cols_to_optimize (remove num_cols_missing)
-                    cols_to_optimize = list(set(cols_to_optimize).difference(
-                        set(num_cols_missing)))
-                # optimize inside df_copy
-                for col in cols_to_optimize:
-                    df_copy[col] = df_copy[col].values.astype(
+                    cols_to_optimize = np.setdiff1d(
+                        cols_to_optimize, num_cols_missing,
+                        assume_unique=True)
+                # optimize inside _df, _df_dict and update _cols_to_optimize
+                for col in [*cols_to_optimize]:
+                    self._df[col] = self._df[col].astype(
+                        self._cols_to_optimize[col])
+                    self._df_dict[col] = self._df_dict[col].astype(
                         self._cols_to_optimize[col])
                     self._cols_to_optimize.pop(col)
 
@@ -626,34 +613,9 @@ class CleanDataFrame:
             if len(self._cat_cols.keys()) > 0:
                 # convert to categorical
                 for col in [*self._cat_cols.keys()]:
-                    df_copy[col] = df_copy[col].astype('category')
+                    self._df[col] = self._df[col].astype('category')
                     # update _cat_cols by removing col
                     self._cat_cols.pop(col)
-            # now we will update df attribute
-            self._df = df_copy
-
-    def _unique_val_report(self) -> str:
-        """
-        Reports the columns with unique values.
-
-        Returns
-        -------
-        str
-            A string contains a `header` which explaining the report
-            purpose and a `body` that show the details (as per the
-            availability of unique value columns)
-        """
-        # define report header
-        header = '- Checking if any column has a unique value ... '
-
-        # check if there are columns with unique values to put in report body
-        if len(self._unique_val_cols) > 0:
-            body = f'\nThese columns has one value: {self._unique_val_cols}'
-        else:
-            body = 'No columns founded.'
-
-        # return the unique values full report
-        return header + body
 
     def _duplicated_report(self) -> Tuple[str, Optional[pd.DataFrame]]:
         """
@@ -678,7 +640,7 @@ class CleanDataFrame:
                 f''' rows, which is {round(len(self._duplicate_inds
                 )*100 / len(self._df), 2)}% from the dataset, duplicated '''
                 'rows are:')
-            data = self._df[self._df.duplicated(keep=False)]
+            data = self._df.iloc[self._duplicate_inds]
         else:
             body = 'No duplications.'
             data = None

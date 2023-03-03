@@ -1,6 +1,11 @@
 =======
 History
 =======
+
+0.2.1 (2023-03-03)
+------------------
+* Improve module performance.
+
 0.2.0 (2023-03-02)
 ------------------
 * Add a new report for categorical columns.

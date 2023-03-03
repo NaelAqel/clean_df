@@ -27,15 +27,14 @@ Description and Features
 ------------------------
 The first step of any data analysis project is to check and clean the data, in this module I implemented a very effiecint code that can:  
 
+* Automatically drop columns that have a unique value (these columns are useless, so it will be dropped).
 * Report your **Pandas DataFrame** to decide for actions, this report will show:  
 
-  #. Columns with unique value report.
   #. Duplicated rows report.
   #. Columns’ Datatype to optimize memory report.
   #. Columns to convert to categorical report.
   #. Outliers report.
   #. Missing values report.
-
 
 
 * Clean the dataframe by dropping columns that have a high ratio of missing values, rows with missing values, and duplicated rows in the dataframe.
@@ -73,7 +72,7 @@ Pass your pandas dataframe to ``CleanDataFrame`` class::
 
 Reporting
 ^^^^^^^^^
-Call ``report`` method to see a full report about the dataframe (unique value columns, duplications, columns to optimize its data types, outliers, and missing values::
+Call ``report`` method to see a full report about the dataframe (duplications, columns to optimize its data types, categorical columns, outliers, and missing values::
 
         cdf.report(
                 show_matrix=True,   # show matrix missing values (from missingno package), default is True
@@ -84,7 +83,7 @@ Call ``report`` method to see a full report about the dataframe (unique value co
 
 Cleaning
 ^^^^^^^^
-Call ``clean`` method to drop single value columns, high number of missing value columns, duplicated rows, and rows with missing values::
+Call ``clean`` method to drop high number of missing value columns, duplicated rows, and rows with missing values::
 
         cdf.clean(
                 min_missing_ratio=0.05,    # the minimum ratio of missing values to drop a column, default is 0.05

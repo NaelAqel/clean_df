@@ -128,14 +128,14 @@ class TestIqr:
 
     def test_with_outliers(self):
         # generate array with outliers
-        arr_low = np.random.normal(0, 1, 6)
-        arr_mid = np.random.normal(50, 1, 87)
-        arr_high = np.random.normal(1000, 1, 7)
+        arr_low = np.random.normal(0, 1, 9)
+        arr_mid = np.random.normal(500, 1, 80)
+        arr_high = np.random.normal(1000, 1, 11)
         # concatenate all in one array
         arr = np.concatenate((arr_low, arr_mid, arr_high))
 
-        # arr will have 6 lower and 8 upper outlier, full arr size is 100
-        assert iqr(arr) == pytest.approx([6, 8, 14, 14])
+        # arr will have 9 lower and 11 upper outlier, full arr size is 100
+        assert all(iqr(arr) == [9, 11, 20, 20])
 
     def test_without_outliers(self):
         # take random uniform distribution array
