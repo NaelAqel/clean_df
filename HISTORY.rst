@@ -2,6 +2,10 @@
 History
 =======
 
+0.2.2 (2023-03-03)
+------------------
+* Fix a bug that made "dict_keys" error in some speical cases.
+
 0.2.1 (2023-03-03)
 ------------------
 * Improve module performance.

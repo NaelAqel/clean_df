@@ -587,7 +587,7 @@ class CleanDataFrame:
         if self._cols_to_optimize != {} or len(self._cat_cols) > 0:
             # if there are columns to optimize
             if len(self._cols_to_optimize.keys()) > 0:
-                cols_to_optimize = self._cols_to_optimize.keys()
+                cols_to_optimize = np.array([*self._cols_to_optimize.keys()])
                 # check if columns have missings
                 num_cols_missing = np.array([
                     col for col in cols_to_optimize
@@ -602,7 +602,7 @@ class CleanDataFrame:
                         cols_to_optimize, num_cols_missing,
                         assume_unique=True)
                 # optimize inside _df, _df_dict and update _cols_to_optimize
-                for col in [*cols_to_optimize]:
+                for col in cols_to_optimize:
                     self._df[col] = self._df[col].astype(
                         self._cols_to_optimize[col])
                     self._df_dict[col] = self._df_dict[col].astype(
