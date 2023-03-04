@@ -309,14 +309,9 @@ class CleanDataFrame:
         # save columns (in its order) in _cols_order
         self._cols_order = np.array(self._df.columns)
 
-        # Convert dataframe to dictionary after removing all missing
-        self._df_dict = {col: self._df[col].replace(
-            'nan', np.nan).dropna().values for col in self._cols_order}
-
         # ~~~~~ Unique value columns ~~~~~
         unique_val_cols = np.array([
-            col for col in self._cols_order
-            if len(np.unique(self._df_dict[col])) <= 1])
+            col for col in self._cols_order if self._df[col].nunique() <= 1])
         # if there are columns with only unique value, drop them and update
         # relevent attributes
         if len(unique_val_cols) > 0:
@@ -325,25 +320,23 @@ class CleanDataFrame:
             print(f"[{', '.join(unique_val_cols)}] columns dropped.")
             self._cols_order = np.setdiff1d(
                 self._cols_order, unique_val_cols, assume_unique=True)
-            for col in unique_val_cols:
-                self._df_dict.pop(col, None)
 
         # list if dataframe has columns with type 'category', to exclude it
         # as numpy can not deal with category datatype
         cols_without_cat = np.array(
             [col for col in self._cols_order
-             if self._df_dict[col].dtype != 'category'])
+             if self._df[col].values.dtype != 'category'])
         # list all columns that can be categorical
-        self._cat_cols = {col: np.unique(self._df_dict[col])
+        self._cat_cols = {col: pd.unique(self._df[col].dropna())
                           for col in cols_without_cat if (
-            self._df_dict[col].dtype == 'O') and len(
-            set(self._df_dict[col])) <= self._max_num_cat}
+            self._df[col].values.dtype == 'O') and len(
+            set(self._df[col].values)) <= self._max_num_cat}
         # list numerical columns that are not in unique_val_cols (note: numpy
         # considered datatime as numerical, so we exclude it datatime)
         self._num_cols = np.array([
             col for col in cols_without_cat
-            if np.issubdtype(self._df_dict[col].dtype.name, np.number)
-            and not np.issubdtype(self._df_dict[col].dtype.name, '<m8[ns]')])
+            if np.issubdtype(self._df[col].values.dtype.name, np.number)
+            and not np.issubdtype(self._df[col].values.dtype.name, '<m8[ns]')])
 
         # ~~~~~ Duplicated Rows ~~~~~
         self._duplicate_inds = self._df[self._df.duplicated(keep=False)
@@ -351,13 +344,13 @@ class CleanDataFrame:
 
         # ~~~~~ Optimization of Columns ~~~~~
         self._cols_to_optimize = {
-            col: optimize_num(self._df_dict[col]) for col in self._num_cols
-            if optimize_num(self._df_dict[col]) is not None}
+            col: optimize_num(self._df[col].values) for col in self._num_cols
+            if optimize_num(self._df[col].values) is not None}
 
         # ~~~~~ Outliers ~~~~~
         self._outliers = {
-            col: iqr(self._df_dict[col]) for col in self._num_cols
-            if iqr(self._df_dict[col]) is not None}
+            col: iqr(self._df[col].values) for col in self._num_cols
+            if iqr(self._df[col].values) is not None}
 
         # ~~~~~ Missing Values ~~~~~
         self._missing_cols = {
@@ -543,7 +536,6 @@ class CleanDataFrame:
             self._num_cols = np.setdiff1d(
                 self._num_cols, dropped_cols, assume_unique=True)
             for col in dropped_cols:
-                self._df_dict.pop(col, None)
                 self._cat_cols.pop(col, None)
                 self._cols_to_optimize.pop(col, None)
                 self._outliers.pop(col, None)
@@ -604,8 +596,6 @@ class CleanDataFrame:
                 # optimize inside _df, _df_dict and update _cols_to_optimize
                 for col in cols_to_optimize:
                     self._df[col] = self._df[col].astype(
-                        self._cols_to_optimize[col])
-                    self._df_dict[col] = self._df_dict[col].astype(
                         self._cols_to_optimize[col])
                     self._cols_to_optimize.pop(col)
 

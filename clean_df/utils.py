@@ -82,7 +82,7 @@ def optimize_num(arr) -> Optional[np.dtype]:
         return types[type_index]
 
 
-def iqr(arr) -> Optional[list]:
+def iqr(arr) -> Optional[np.ndarray]:
     """
     Calculates the interquartile range (IQR) of a numerical array.
     The IQR is calculated as the difference between the 75th percentile and

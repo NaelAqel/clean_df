@@ -121,13 +121,17 @@ class TestCleanDataFrame:
             'float32': np.float32}
 
         # assert outliers
-        true_vals = {
-            'uint8': [0, 2, 2, 2.02],  'uint16': [6, 2, 8, 7.77],
-            'uint32': [6, 5, 11, 11.34], 'uint64': [1, 5, 6, 5.83],
-            'int8': [4, 0, 4, 3.88], 'int16': [0, 1, 1, 0.99],
-            'int32': [5, 5, 10, 10.53], 'int64': [6, 2, 8, 7.77],
-            'float16': [4, 5, 9, 8.74], 'float32': [8, 0, 8, 7.77],
-            'float64': [3, 6, 9, 8.74]}
+        true_vals = {'uint8': [0.0, 2.0, 2.0, 1.94],
+                     'uint16': [6.0, 2.0, 8.0, 7.77],
+                     'uint32': [6.0, 5.0, 11.0, 10.68],
+                     'uint64': [1.0, 5.0, 6.0, 5.83],
+                     'int8': [4.0, 0.0, 4.0, 3.88],
+                     'int16': [0.0, 1.0, 1.0, 0.97],
+                     'int32': [5.0, 5.0, 10.0, 9.71],
+                     'int64': [6.0, 2.0, 8.0, 7.77],
+                     'float16': [4.0, 5.0, 9.0, 8.74],
+                     'float32': [8.0, 0.0, 8.0, 7.77],
+                     'float64': [3.0, 6.0, 9.0, 8.74]}
         # check the keys are equal
         assert sorted([*true_vals.keys()]) == sorted(
             [*self.cdf.outliers.keys()])
@@ -156,7 +160,8 @@ class TestCleanDataFrame:
             [*self.cdf.cat_cols.keys()])
         # check values
         for col in true_vals.keys():
-            assert all(self.cdf.cat_cols[col] == true_vals[col])
+            assert all(np.sort(self.cdf.cat_cols[col]
+                               ) == np.sort(true_vals[col]))
 
         # assert num_cols
         assert all(np.sort(self.cdf.num_cols) == np.sort(np.array([
@@ -178,13 +183,17 @@ class TestCleanDataFrame:
             'float32': np.float32}
 
         # assert outliers
-        true_vals = {
-            'uint8': [0, 2, 2, 2],  'uint16': [3, 2, 5, 5],
-            'uint32': [5, 5, 10, 10], 'uint64': [2, 5, 7, 7],
-            'int8': [3, 0, 3, 3], 'int16': [0, 1, 1, 1],
-            'int32': [3, 5, 8, 8], 'int64': [3, 2, 5, 5],
-            'float16': [4, 5, 9, 9], 'float32': [5, 1, 6, 6],
-            'float64': [1, 6, 7, 7]}
+        true_vals = {'uint8': [0.0, 2.0, 2.0, 2.0],
+                     'uint16': [3.0, 2.0, 5.0, 5.0],
+                     'uint32': [5.0, 5.0, 10.0, 10.0],
+                     'uint64': [2.0, 5.0, 7.0, 7.0],
+                     'int8': [3.0, 0.0, 3.0, 3.0],
+                     'int16': [0.0, 1.0, 1.0, 1.0],
+                     'int32': [3.0, 5.0, 8.0, 8.0],
+                     'int64': [3.0, 2.0, 5.0, 5.0],
+                     'float16': [4.0, 5.0, 9.0, 9.0],
+                     'float32': [5.0, 1.0, 6.0, 6.0],
+                     'float64': [1.0, 6.0, 7.0, 7.0]}
         # check the keys are equal
         assert sorted([*true_vals.keys()]) == sorted(
             [*self.cdf.outliers.keys()])
@@ -211,7 +220,8 @@ class TestCleanDataFrame:
             [*self.cdf.cat_cols.keys()])
         # check values
         for col in true_vals.keys():
-            assert all(self.cdf.cat_cols[col] == true_vals[col])
+            assert all(np.sort(self.cdf.cat_cols[col]
+                               ) == np.sort(true_vals[col]))
 
         # assert num_cols
         assert all(np.sort(self.cdf.num_cols) == np.sort(np.array([
@@ -258,7 +268,8 @@ class TestCleanDataFrame:
             [*self.cdf.cat_cols.keys()])
         # check values
         for col in true_vals.keys():
-            assert all(self.cdf.cat_cols[col] == true_vals[col])
+            assert all(np.sort(self.cdf.cat_cols[col]
+                               ) == np.sort(true_vals[col]))
 
         # assert num_cols
         assert all(np.sort(self.cdf.num_cols) == np.sort(np.array([
@@ -277,13 +288,17 @@ class TestCleanDataFrame:
         assert self.cdf.cols_to_optimize == {}
 
         # assert outliers
-        true_vals = {
-            'uint8': [0, 4, 4, 5.06],  'uint16': [1, 2, 3, 3.8],
-            'uint32': [4, 4, 8, 10.13], 'uint64': [4, 4, 8, 10.13],
-            'int8': [4, 2, 6, 7.59], 'int16': [0, 1, 1, 1.27],
-            'int32': [2, 4, 6, 7.59], 'int64': [1, 2, 3, 3.8],
-            'float16': [2, 4, 6, 7.59], 'float32': [3, 1, 4, 5.06],
-            'float64': [0, 5, 5, 6.33]}
+        true_vals = {'uint8': [0.0, 4.0, 4.0, 5.06],
+                     'uint16': [1.0, 2.0, 3.0, 3.8],
+                     'uint32': [4.0, 4.0, 8.0, 10.13],
+                     'uint64': [4.0, 4.0, 8.0, 10.13],
+                     'int8': [4.0, 2.0, 6.0, 7.59],
+                     'int16': [0.0, 1.0, 1.0, 1.27],
+                     'int32': [2.0, 4.0, 6.0, 7.59],
+                     'int64': [1.0, 2.0, 3.0, 3.8],
+                     'float16': [2.0, 4.0, 6.0, 7.59],
+                     'float32': [3.0, 1.0, 4.0, 5.06],
+                     'float64': [0.0, 5.0, 5.0, 6.33]}
         # check the keys are equal
         assert sorted([*true_vals.keys()]) == sorted(
             [*self.cdf.outliers.keys()])

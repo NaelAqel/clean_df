@@ -1,6 +1,9 @@
 =======
 History
 =======
+0.2.3 (2013-03-04)
+------------------
+* Improve memory consumption and module performance.
 
 0.2.2 (2023-03-03)
 ------------------
