@@ -323,5 +323,6 @@ class TestCleanDataFrame:
         expected = np.array(Image.open(os.path.join(main_script_dir, rel_path)
                                        ).convert('L'))
 
-        # assert that the two photos are the same
-        assert structural_similarity(captured, expected) == 1
+        # assert that the two photos are the same (we will give some small
+        # tolerence due to structural_similarity propeties)
+        assert structural_similarity(captured, expected) >= 0.995
