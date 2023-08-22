@@ -16,7 +16,8 @@ requirements = [
     'pandas>=0.25.3',
     'IPython>=7.10',
     'matplotlib>=3.0.3',
-    'tabulate>=0.8.0'
+    'tabulate>=0.8.0',
+    'scikit-image>=0.15.0'
 ]
 
 test_requirements = ['pytest>=3', ]
