@@ -79,86 +79,94 @@ Now, we can start apply the methods, first lets see the report about dataset::
                 heat_kws={}         # if need to pass any arguments to heat plot, default is {}
                 )
 
-        =============================== Duplicated Rows ===============================
-        - Checking if data frame has duplicated rows ... 
+        ===============
+        Duplicated Rows
+        ===============
         The dataset has 7 duplicated rows, which is 0.0% from the dataset, duplicated rows are:
 
-          FL_DATE 	OP_CARRIER 	OP_CARRIER_FL_NUM 	ORIGIN 	DEST 	CRS_DEP_TIME 	DEP_TIME 	DEP_DELAY 	TAXI_OUT 	WHEELS_OFF 	... 	CRS_ELAPSED_TIME 	ACTUAL_ELAPSED_TIME 	AIR_TIME 	DISTANCE 	CARRIER_DELAY 	WEATHER_DELAY 	NAS_DELAY 	SECURITY_DELAY 	LATE_AIRCRAFT_DELAY 	Unnamed: 27
-        1 2018-01-01 	UA 	        2427 	                LAS 	SFO 	1115     	1107.0 	        -8.0     	11.0     	1118.0   	... 	99.0            	83.0 	                65.0 	        414.0 	        NaN 	        NaN 	        NaN 	        NaN 	        NaN 	                NaN
-        2 2018-01-01 	UA       	2426 	                SNA 	DEN 	1335 	        1330.0   	-5.0 	        15.0 	        1345.0 	        ... 	134.0 	                126.0    	        106.0    	846.0    	NaN      	NaN      	NaN      	NaN      	NaN      	        NaN
-        3 2018-01-01 	UA 	        2425 	                RSW 	ORD 	1546    	1552.0 	        6.0      	19.0     	1611.0   	... 	190.0            	182.0 	                157.0 	        1120.0 	        NaN 	        NaN 	        NaN 	        NaN 	        NaN 	                NaN
-        1 2018-01-01 	UA       	2427    	        LAS 	SFO 	1115 	        1107.0   	-8.0 	        11.0 	        1118.0 	        ... 	99.0 	                83.0 	                65.0     	414.0    	NaN      	NaN      	NaN      	NaN      	NaN              	NaN
-        2 2018-01-01 	UA 	        2426    	        SNA 	DEN 	1335     	1330.0 	        -5.0     	15.0     	1345.0  	... 	134.0            	126.0    	        106.0 	        846.0 	        NaN 	        NaN 	        NaN 	        NaN 	        NaN      	        NaN
-        2 2018-01-01 	UA      	2426            	SNA 	DEN 	1335 	        1330.0   	-5.0 	        15.0 	        1345.0 	        ... 	134.0    	        126.0 	                106.0    	846.0    	NaN      	NaN      	NaN      	NaN      	NaN              	NaN
-        3 2018-01-01 	UA 	        2425 	                RSW 	ORD 	1546 	        1552.0 	        6.0 	        19.0    	1611.0  	... 	190.0 	                182.0   	        157.0 	        1120.0 	        NaN 	        NaN 	        NaN 	        NaN 	        NaN 	                NaN
+            FL_DATE     OP_CARRIER      OP_CARRIER_FL_NUM  ORIGIN    DEST      CRS_DEP_TIME    DEP_TIME    DEP_DELAY    TAXI_OUT    WHEELS_OFF    WHEELS_ON    TAXI_IN    CRS_ARR_TIME    ARR_TIME    ARR_DELAY    CANCELLED    CANCELLATION_CODE    DIVERTED    CRS_ELAPSED_TIME    ACTUAL_ELAPSED_TIME    AIR_TIME    DISTANCE    CARRIER_DELAY    WEATHER_DELAY    NAS_DELAY    SECURITY_DELAY    LATE_AIRCRAFT_DELAY
+        --  ----------  ------------  -------------------  --------  ------  --------------  ----------  -----------  ----------  ------------  -----------  ---------  --------------  ----------  -----------  -----------  -------------------  ----------  ------------------  ---------------------  ----------  ----------  ---------------  ---------------  -----------  ----------------  ---------------------
+         1  2018-01-01  UA                           2427  LAS       SFO               1115        1107           -8          11          1118         1223          7            1254        1230          -24            0                  nan           0                  99                     83          65         414              nan              nan          nan               nan                    nan
+         2  2018-01-01  UA                           2426  SNA       DEN               1335        1330           -5          15          1345         1631          5            1649        1636          -13            0                  nan           0                 134                    126         106         846              nan              nan          nan               nan                    nan
+         3  2018-01-01  UA                           2425  RSW       ORD               1546        1552            6          19          1611         1748          6            1756        1754           -2            0                  nan           0                 190                    182         157        1120              nan              nan          nan               nan                    nan
+         1  2018-01-01  UA                           2427  LAS       SFO               1115        1107           -8          11          1118         1223          7            1254        1230          -24            0                  nan           0                  99                     83          65         414              nan              nan          nan               nan                    nan
+         2  2018-01-01  UA                           2426  SNA       DEN               1335        1330           -5          15          1345         1631          5            1649        1636          -13            0                  nan           0                 134                    126         106         846              nan              nan          nan               nan                    nan
+         2  2018-01-01  UA                           2426  SNA       DEN               1335        1330           -5          15          1345         1631          5            1649        1636          -13            0                  nan           0                 134                    126         106         846              nan              nan          nan               nan                    nan
+         3  2018-01-01  UA                           2425  RSW       ORD               1546        1552            6          19          1611         1748          6            1756        1754           -2            0                  nan           0                 190                    182         157        1120              nan              nan          nan               nan                    nan 
 
 
-
-
-        ============================= Optimization Columns ============================
-        - Checking datatypes to optimize memory ... 
+        ==============================
+        Numerical Columns Optimization
+        ==============================
         These numarical columns can be down graded:
-        
-                columns
-        int16 	DEP_DELAY, ARR_DELAY, CRS_ELAPSED_TIME
-        uint8 	TAXI_OUT, CANCELLED, DIVERTED
-        uint16 	OP_CARRIER_FL_NUM, CRS_DEP_TIME, DEP_TIME, WHEELS_OFF, WHEELS_ON, TAXI_IN, CRS_ARR_TIME, ARR_TIME, 
-                ACTUAL_ELAPSED_TIME, AIR_TIME, DISTANCE, CARRIER_DELAY, WEATHER_DELAY, NAS_DELAY, SECURITY_DELAY, 
-                LATE_AIRCRAFT_DELAY
+
+                columns_to_convert
+        ------  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        uint16  OP_CARRIER_FL_NUM, CRS_DEP_TIME, DEP_TIME, WHEELS_OFF, WHEELS_ON, TAXI_IN, CRS_ARR_TIME, ARR_TIME, ACTUAL_ELAPSED_TIME, AIR_TIME, DISTANCE, CARRIER_DELAY, WEATHER_DELAY, NAS_DELAY, SECURITY_DELAY, LATE_AIRCRAFT_DELAY
+        int16   DEP_DELAY, ARR_DELAY, CRS_ELAPSED_TIME
+        uint8   TAXI_OUT, CANCELLED, DIVERTED 
 
 
-
-        ============================= Categorical Columns =============================
-        - Checking columns that can convert to categorical ... 
+        ================================
+        Categorical Columns Optimization
+        ================================
         These columns can be converted to categorical:
 
-                                unique_values
-        OP_CARRIER 	        9E, AA, AS, B6, DL, EV, F9, G4, HA, MQ, NK, OH, OO, UA, VX, WN, YV, YX
-        CANCELLATION_CODE 	A, B, C, D
+                           unique_values
+        -----------------  ----------------------------------------------------------------------
+        OP_CARRIER         UA, AS, 9E, B6, EV, F9, G4, HA, MQ, NK, OH, OO, VX, WN, YV, YX, AA, DL
+        CANCELLATION_CODE  B, A, C, D 
 
 
-        =================================== Outliers ==================================
-        - Checking for outliers ... 
-        Outliers are:  
-                                outliers_lower 	        outliers_upper 	outliers_total 	outliers_percentage
-        DEP_DELAY        	3058.0     	        937650.0   	940708.0        13.26
-        ARR_DELAY 	        9874.0     	        642724.0        652598.0  	9.22
-        DISTANCE         	0.0                	432362.0  	432362.0        5.99
-        TAXI_IN 	        0.0 	                428981.0        428981.0   	6.05
-        TAXI_OUT         	0.0               	411112.0  	411112.0        5.79
-        CRS_ELAPSED_TIME 	5.0 	                395338.0        395343.0  	5.48
-        AIR_TIME 	        0.0       	        391119.0  	391119.0        5.53
-        ACTUAL_ELAPSED_TIME 	0.0        	        371247.0        371247.0  	5.24
-        CARRIER_DELAY 	        0.0               	155876.0  	155876.0        11.52
-        LATE_AIRCRAFT_DELAY 	0.0 	                132029.0        132029.0  	9.76
-        CANCELLED        	0.0                    	116584.0  	116584.0        1.62
-        NAS_DELAY 	        0.0 	                100224.0        100224.0  	7.41
-        WEATHER_DELAY    	0.0              	85055.0   	85055.0	        6.29
-        DIVERTED 	        0.0 	                17859.0	        17859.0    	0.25
-        SECURITY_DELAY 	        0.0       	        4348.0 	        4348.0 	        0.32
+        ========
+        Outliers
+        ========
+        Outliers are:
+
+                               outliers_lower    outliers_upper    outliers_total    outliers_percentage
+        -------------------  ----------------  ----------------  ----------------  ---------------------
+        DEP_DELAY                        3058            937650            940708                  13.04
+        ARR_DELAY                        9874            642724            652598                   9.05
+        DISTANCE                            0            432362            432362                   5.99
+        TAXI_IN                             0            428981            428981                   5.95
+        TAXI_OUT                            0            411112            411112                   5.7
+        CRS_ELAPSED_TIME                    5            395338            395343                   5.48
+        AIR_TIME                            0            391119            391119                   5.42
+        ACTUAL_ELAPSED_TIME                 0            371247            371247                   5.15
+        CARRIER_DELAY                       0            155876            155876                   2.16
+        LATE_AIRCRAFT_DELAY                 0            132029            132029                   1.83
+        CANCELLED                           0            116584            116584                   1.62
+        NAS_DELAY                           0            100224            100224                   1.39
+        WEATHER_DELAY                       0             85055             85055                   1.18
+        DIVERTED                            0             17859             17859                   0.25
+        SECURITY_DELAY                      0              4348              4348                   0.06 
 
 
-        ================================ Missing Values ===============================
-        - Checking for missing values ... 
+        ==============
+        Missing Values
+        ==============
         Missing details are:
-                                missing_counts 	missing_percentage
-        CANCELLATION_CODE 	7096866.0 	98.38
-        CARRIER_DELAY    	5860740.0 	81.25
-        SECURITY_DELAY 	        5860740.0 	81.25
-        NAS_DELAY        	5860740.0 	81.25
-        WEATHER_DELAY 	        5860740.0 	81.25
-        LATE_AIRCRAFT_DELAY 	5860740.0 	81.25
-        ARR_DELAY        	137040.0   	1.90
-        ACTUAL_ELAPSED_TIME 	134442.0        1.86
-        AIR_TIME         	134442.0   	1.86
-        TAXI_IN 	        119246.0        1.65
-        WHEELS_ON        	119246.0  	1.65
-        ARR_TIME 	        119245.0        1.65
-        DEP_DELAY       	117234.0  	1.63
-        TAXI_OUT 	        115830.0        1.61
-        WHEELS_OFF      	115829.0  	1.61
-        DEP_TIME 	        112317.0        1.56
-        CRS_ELAPSED_TIME 	10.0 	        0.00
+
+                               missing_counts    missing_percentage
+        -------------------  ----------------  --------------------
+        CANCELLATION_CODE         7.09687e+06                 98.38
+        CARRIER_DELAY             5.86074e+06                 81.25
+        WEATHER_DELAY             5.86074e+06                 81.25
+        NAS_DELAY                 5.86074e+06                 81.25
+        SECURITY_DELAY            5.86074e+06                 81.25
+        LATE_AIRCRAFT_DELAY       5.86074e+06                 81.25
+        ARR_DELAY            137040                            1.9
+        ACTUAL_ELAPSED_TIME  134442                            1.86
+        AIR_TIME             134442                            1.86
+        WHEELS_ON            119246                            1.65
+        TAXI_IN              119246                            1.65
+        ARR_TIME             119245                            1.65
+        DEP_DELAY            117234                            1.63
+        TAXI_OUT             115830                            1.61
+        WHEELS_OFF           115829                            1.61
+        DEP_TIME             112317                            1.56
+        CRS_ELAPSED_TIME         10                            0 
+
 
 .. image:: 1.png
 .. image:: 2.png
@@ -184,48 +192,55 @@ To clean the dataframe (remove missing, unique value columns and duplication)::
         >>> cdf.report()                   # to see the changes
 
 
-        =============================== Duplicated Rows ===============================
-        - Checking if data frame has duplicated rows ... No duplications.
+        ===============
+        Duplicated Rows
+        ===============
+        No duplicated rows.
 
 
-        ============================= Optimization Columns ============================
-        - Checking datatypes to optimize memory ... 
+        ==============================
+        Numerical Columns Optimization
+        ==============================
         These numarical columns can be down graded:
 
-                columns
-        int16 	DEP_DELAY, ARR_DELAY, CRS_ELAPSED_TIME
-        uint8 	TAXI_OUT, CANCELLED, DIVERTED 
-        uint16 	OP_CARRIER_FL_NUM, CRS_DEP_TIME, DEP_TIME, WHEELS_OFF, WHEELS_ON, TAXI_IN, CRS_ARR_TIME, ARR_TIME, 
-                ACTUAL_ELAPSED_TIME, AIR_TIME, DISTANCE
+                columns_to_convert
+        ------  ------------------------------------------------------------------------------------------------------------------------------------------
+        uint16  OP_CARRIER_FL_NUM, CRS_DEP_TIME, DEP_TIME, WHEELS_OFF, WHEELS_ON, TAXI_IN, CRS_ARR_TIME, ARR_TIME, ACTUAL_ELAPSED_TIME, AIR_TIME, DISTANCE
+        int16   DEP_DELAY, ARR_DELAY, CRS_ELAPSED_TIME
+        uint8   TAXI_OUT, CANCELLED, DIVERTED 
 
 
-        ============================= Categorical Columns =============================
-        - Checking columns that can convert to categorical ... 
+        ================================
+        Categorical Columns Optimization
+        ================================
         These columns can be converted to categorical:
 
-                        unique_values
-        OP_CARRIER 	9E, AA, AS, B6, DL, EV, F9, G4, HA, MQ, NK, OH, OO, UA, VX, WN, YV, YX
+                    unique_values
+        ----------  ----------------------------------------------------------------------
+        OP_CARRIER  UA, AS, 9E, B6, EV, F9, G4, HA, MQ, NK, OH, OO, VX, WN, YV, YX, AA, DL 
 
 
-
-        =================================== Outliers ==================================
-        - Checking for outliers ... 
+        ========
+        Outliers
+        ========
         Outliers are:
 
-                                outliers_lower 	        outliers_upper 	outliers_total 	outliers_percentage
-        DEP_DELAY 	        3048.0           	931179.0 	934227.0 	13.21
-        ARR_DELAY        	9869.0 	                642674.0 	652543.0 	9.23
-        DISTANCE 	        0.0              	427251.0 	427251.0 	6.04
-        TAXI_IN          	0.0              	426694.0 	426694.0 	6.03
-        TAXI_OUT 	        0.0             	408062.0 	408062.0 	5.77
-        AIR_TIME 	        0.0 	                391119.0 	391119.0 	5.53
-        CRS_ELAPSED_TIME 	1.0             	390605.0 	390606.0 	5.52
-        ACTUAL_ELAPSED_TIME 	0.0 	                371246.0 	371246.0 	5.25
+                               outliers_lower    outliers_upper    outliers_total    outliers_percentage
+        -------------------  ----------------  ----------------  ----------------  ---------------------
+        DEP_DELAY                        3048            931179            934227                  13.21
+        ARR_DELAY                        9869            642674            652543                   9.23
+        DISTANCE                            0            427251            427251                   6.04
+        TAXI_IN                             0            426694            426694                   6.03
+        TAXI_OUT                            0            408062            408062                   5.77
+        AIR_TIME                            0            391119            391119                   5.53
+        CRS_ELAPSED_TIME                    1            390605            390606                   5.52
+        ACTUAL_ELAPSED_TIME                 0            371246            371246                   5.25 
 
 
-
-        ================================ Missing Values ===============================
-        - Checking for missing values ... No missing values.
+        ==============
+        Missing Values
+        ==============
+        No missing values.
 
 
 Optimizing
@@ -235,39 +250,46 @@ To optimize the dataframe (convert datatypes)::
         >>> cdf.optimize()
         >>> cdf.report()                # to see the changes after optimization
 
-        ============================= Unique Value Columns ============================
-        - Checking if any column has a unique value ... No columns founded. 
-
-        =============================== Duplicated Rows ===============================
-        - Checking if data frame has duplicated rows ... No duplications.
-
-
-        ============================= Optimization Columns ============================
-        - Checking datatypes to optimize memory ... No columns to optimize.
+        ===============
+        Duplicated Rows
+        ===============
+        No duplicated rows.
 
 
-        ============================= Categorical Columns =============================
-        - Checking columns that can convert to categorical ... No columns to optimize.
+        ==============================
+        Numerical Columns Optimization
+        ==============================
+        No numerical columns to optimize.
 
 
-        =================================== Outliers ==================================
-        - Checking for outliers ... 
+        ================================
+        Categorical Columns Optimization
+        ================================
+        No columns to optimize.
+
+
+        ========
+        Outliers
+        ========
         Outliers are:
 
-                                outliers_lower 	        outliers_upper 	outliers_total 	outliers_percentage
-        DEP_DELAY 	        3048.0           	931179.0 	934227.0 	13.21
-        ARR_DELAY        	9869.0 	                642674.0 	652543.0 	9.23
-        DISTANCE 	        0.0              	427251.0 	427251.0 	6.04
-        TAXI_IN          	0.0              	426694.0 	426694.0 	6.03
-        TAXI_OUT 	        0.0             	408062.0 	408062.0 	5.77
-        AIR_TIME 	        0.0 	                391119.0 	391119.0 	5.53
-        CRS_ELAPSED_TIME 	1.0             	390605.0 	390606.0 	5.52
-        ACTUAL_ELAPSED_TIME 	0.0 	                371246.0 	371246.0 	5.25
+                               outliers_lower    outliers_upper    outliers_total    outliers_percentage
+        -------------------  ----------------  ----------------  ----------------  ---------------------
+        DEP_DELAY                        3048            931179            934227                  13.21
+        ARR_DELAY                        9869            642674            652543                   9.23
+        DISTANCE                            0            427251            427251                   6.04
+        TAXI_IN                             0            426694            426694                   6.03
+        TAXI_OUT                            0            408062            408062                   5.77
+        AIR_TIME                            0            391119            391119                   5.53
+        CRS_ELAPSED_TIME                    1            390605            390606                   5.52
+        ACTUAL_ELAPSED_TIME                 0            371246            371246                   5.25 
 
 
+        ==============
+        Missing Values
+        ==============
+        No missing values.
 
-        ================================ Missing Values ===============================
-        - Checking for missing values ... No missing values.
 
 All is clear now, only we can see the outliers, the actions required with outliers is out of this module scope.
 
@@ -275,7 +297,7 @@ How much did we optimize?
 -------------------------
 Lets see our dataframe info after cleaning and optimizing::
 
-        >>> cdf.df.info()
+        >>> df.info()
 
         <class 'pandas.core.frame.DataFrame'>
         Int64Index: 7071817 entries, 0 to 7213445

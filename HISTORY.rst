@@ -1,7 +1,12 @@
 =======
 History
 =======
-0.2.3 (2013-03-04)
+0.3.0 (2023-08-23)
+------------------
+* Improve the performance when calling ``report`` method.
+* The ``pytest`` now is including the full methods in the module. 
+
+0.2.3 (2023-03-04)
 ------------------
 * Improve memory consumption and module performance.
 
