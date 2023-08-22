@@ -8,10 +8,8 @@ import numpy as np
 import re
 import missingno as msno
 from IPython.display import display
-from typing import Optional, Tuple
-import matplotlib.pyplot as plt
+from tabulate import tabulate
 import warnings
-# import functions from utils.py
 from .utils import optimize_num, iqr
 # show all values in columns
 pd.set_option('display.max_colwidth', None)
@@ -36,17 +34,17 @@ class CleanDataFrame:
         A dictionary of all numerical columns that can be memory optimized, it
         will be {column name: optimized data type}.
     outliers : dict, readonly
-        A dictionary for outliers details in an array as
+        A dictionary for outliers details in descinding order in an array as
         {column name: outlier details} format, the list has:
-            - The number of lower outliers
-            - The number of upper outliers
-            - The total number of outliers
-            - The percentage of the total values that are outliers
+            - The number of lower outliers.
+            - The number of upper outliers.
+            - The total number of outliers.
+            - The percentage of the total values that are outliers.
     missing_cols : dict, readonly
-        A dictionary for missing details in an array as
+        A dictionary for missing details in descinding order in an array as
         {column name: missing details} format, the list has:
-            - The total number of missing values
-            - The percentage of the total values that are missing
+            - The total number of missing values.
+            - The percentage of the total values that are missing.
     cat_cols : dict, readonly
         A dictionary for columns that can convert to categiorical type as
         {column name: array of unique values} format.
@@ -73,8 +71,6 @@ class CleanDataFrame:
             3. Columns to convert to categorical report.
             4. Outliers report.
             5. Missing values report.
-        Each report will have a text message, then show a dataframe or plots
-        if applicable.
 
         Parameters
         ----------
@@ -317,7 +313,7 @@ class CleanDataFrame:
         if len(unique_val_cols) > 0:
             print('Founded useless columns (with single value) ... ', end='')
             self._df.drop(columns=unique_val_cols, inplace=True)
-            print(f"[{', '.join(unique_val_cols)}] columns dropped.")
+            print(f"[{', '.join(unique_val_cols)}] columns dropped.\n")
             self._cols_order = np.setdiff1d(
                 self._cols_order, unique_val_cols, assume_unique=True)
 
@@ -351,6 +347,10 @@ class CleanDataFrame:
         self._outliers = {
             col: iqr(self._df[col].values) for col in self._num_cols
             if iqr(self._df[col].values) is not None}
+        # sort in desc order as per the number of outliers
+        self._outliers = dict(
+            sorted(self._outliers.items(), key=lambda item: item[1][2],
+                   reverse=True))
 
         # ~~~~~ Missing Values ~~~~~
         self._missing_cols = {
@@ -360,6 +360,10 @@ class CleanDataFrame:
                     )*100 / len(self._df), 2)])
                 for col in self._cols_order
                 if pd.isna(self._df[col].values).sum() > 0}
+        # sort in desc order as per the number of missing values
+        self._missing_cols = dict(
+            sorted(self._missing_cols.items(), key=lambda item: item[1][0],
+                   reverse=True))
 
     def report(self, show_matrix=True, show_heat=True, matrix_kws={},
                heat_kws={}) -> None:
@@ -370,8 +374,6 @@ class CleanDataFrame:
             3. Columns to convert to categorical report.
             4. Outliers report.
             5. Missing values report.
-        Each report will have a text message, then show a dataframe or plots
-        if applicable.
 
         Parameters
         ----------
@@ -404,70 +406,131 @@ class CleanDataFrame:
             raise TypeError(
                 "'matrix_kws' and 'heat_kws' should be a dictionary.")
 
-        # ~~~~~~ Duplicated Rows Report ~~~~~~
-        # print section header
-        print(' Duplicated Rows '.center(79, '='))
-        # call reporting function
-        report_duplicated, data_duplicated = self._duplicated_report()
-        # print report
-        print(report_duplicated)
-        # print data if applicable
-        if data_duplicated is not None:
-            display(data_duplicated)
-        print('\n')
+        def header(title) -> str:
+            """
+            Print a formatted title as a header, it will print the title
+            between two '=' lines which has the same length of title
 
-        # ~~~~~~ Optimization Columns Report ~~~~~~
-        # print section header
-        print(' Optimization Columns '.center(79, '='))
-        # call reporting function
-        report_optimize, data_optimize = self._optimization_report()
-        # print optimization columns report
-        print(report_optimize)
-        # print data if applicable
-        if data_optimize is not None:
-            display(data_optimize)
-        print('\n')
+            Parameters
+            ----------
+            title: str
+                A string of the title needed to be formatted.
 
-        # ~~~~~~ Categorical Columns Report ~~~~~~
-        print(' Categorical Columns '.center(79, '='))
-        # call reporting function
-        report_cat, data_cat = self._cat_report()
-        # print categorical columns report
-        print(report_cat)
-        # print data if applicable
-        if data_cat is not None:
-            display(data_cat)
-        print('\n')
+            Rises
+            -----
+            TypeError
+                If `title` is not string.
 
-        # ~~~~~~ Outliers Report ~~~~~~
-        # print section header
-        print(' Outliers '.center(79, '='))
-        # call reporting function
-        report_outliers, data_outliers = self._outliers_report()
-        # print report
-        print(report_outliers)
-        # print data if applicable
-        if data_outliers is not None:
-            display(data_outliers)
-        print('\n')
+            Returns
+            -------
+            str
+                A string of formatted title.
+            """
+            # check 'title' data type
+            if (not isinstance(title, str)):
+                raise TypeError("'title' should be string.")
 
-        # ~~~~~~ Missing Values Report ~~~~~~
-        # print section header
-        print(' Missing Values '.center(79, '='))
-        # call reporting function
-        report_missing, data_missing, matrix, heat = self._missing_report(
-            show_matrix, show_heat, matrix_kws, heat_kws)
-        # print report
-        print(report_missing)
-        # print date if applicable
-        if data_missing is not None:
-            display(data_missing)
-            # plot matrix if applicable
-            if matrix is not None:
-                display(matrix)
-            # plot heat if applicable
-            if heat is not None:
-                display(heat)
+            # generate the upper and lower lines
+            len_title = '='*len(title)
+            # return formatted title
+            return f'{len_title}\n{title}\n{len_title}'
+
+        # ~~~~~ Duplicated Rows Report ~~~~~
+        # print formatted header
+        print(header('Duplicated Rows'))
+        # Checking if we have duplications
+        if len(self._duplicate_inds) > 0:
+            # print a message showing number and percentage of duplications
+            print(
+                f'The dataset has {len(self._duplicate_inds)} duplicated'
+                f''' rows, which is {round(len(self._duplicate_inds
+                )*100 / len(self._df), 2)}% from the dataset, duplicated '''
+                'rows are:\n')
+            # print duplicated rows
+            print(tabulate(self._df.iloc[self._duplicate_inds],
+                           headers=self.df.columns), '\n\n')
+        else:
+            # if no duplications, show this message
+            print('No duplicated rows.\n\n')
+
+        # ~~~~~ Numerical Columns Optimization Report ~~~~~
+        # print formatted header
+        print(header('Numerical Columns Optimization'))
+        # Checking if we have numeraical columns to optimize
+        if self._cols_to_optimize != {}:
+            print('These numarical columns can be down graded:\n')
+            # convert data types as
+            # {data type: list of columns that can convert to this type}
+            optimize_dict = {
+                re.findall('\\.(\\w*)', str(to_type))[0]: [', '.join(
+                    [col for col in self._cols_to_optimize.keys()
+                     if self._cols_to_optimize[col] == to_type])]
+                for to_type in set(self._cols_to_optimize.values())}
+            # print optimize_dict as a table
+            print(tabulate(
+                optimize_dict.values(), showindex=optimize_dict.keys(),
+                headers=['columns_to_convert']), '\n\n')
+        else:
+            # if no columns to optimize, print this message
+            print('No numerical columns to optimize.\n\n')
+
+        # ~~~~~ Categorical Columns Optimization Report ~~~~~
+        # print formatted header
+        print(header('Categorical Columns Optimization'))
+        # Checking if we have string columns to convert
+        if self._cat_cols != {}:
+            print('These columns can be converted to categorical:\n')
+            # convert cat_cols to dataframe and assign to data
+            cat_cols_dict = {col: [', '.join(self._cat_cols[col])]
+                             for col in self._cat_cols.keys()}
+            # print cat_cols_dict as a table
+            print(tabulate(
+                cat_cols_dict.values(), showindex=cat_cols_dict.keys(),
+                headers=['unique_values']), '\n\n')
+        else:
+            # if no columns to optimize, print this message
+            print('No columns to optimize.\n\n')
+
+        # ~~~~~ Outliers Report ~~~~~
+        # print formatted header
+        print(header('Outliers'))
+        # check outliers for report body
+        if self._outliers != {}:
+            print('Outliers are:\n')
+            # print outliers as a table
+            print(tabulate(
+                self._outliers.values(), showindex=self._outliers.keys(),
+                headers=['outliers_lower', 'outliers_upper',
+                         'outliers_total', 'outliers_percentage']), '\n\n')
+        else:
+            # if no outliers, print this message
+            print('No outliers.\n\n')
+
+        # ~~~~~ Missing Values Report ~~~~~
+        # print formatted header
+        print(header('Missing Values'))
+        # check missing values for body report
+        if self._missing_cols != {}:
+            print('Missing details are:\n')
+            # print missing_cols as a table
+            print(tabulate(self._missing_cols.values(),
+                           headers=['missing_counts', 'missing_percentage'],
+                           showindex=self._missing_cols.keys()), '\n\n')
+
+            # if show_matrix is True, show matrix plot
+            if show_matrix:
+                display(msno.matrix(
+                    self._df[self._missing_cols.keys()
+                             ].sort_values([*self._missing_cols.keys()][0]
+                                           ), **matrix_kws))
+
+            # if show_heat is True, show heat plot
+            if show_heat:
+                display(msno.heatmap(self._df[self._missing_cols.keys()],
+                                     **heat_kws))
+        else:
+            # if no missings, print this message
+            print('No missing values.\n\n')
 
     def clean(self, min_missing_ratio=0.05, drop_nan=True, drop_kws={},
               drop_duplicates_kws={}) -> None:
@@ -557,6 +620,11 @@ class CleanDataFrame:
             self._outliers = {
                 col: iqr(self._df[col].values) for col in self._num_cols
                 if iqr(self._df[col].values) is not None}
+            # sort in desc order as per the number of outliers
+            self._outliers = dict(
+                sorted(self._outliers.items(), key=lambda item: item[1][2],
+                       reverse=True))
+
             self._missing_cols = {
                 col: np.array([
                     pd.isna(self._df[col].values).sum(),
@@ -564,6 +632,10 @@ class CleanDataFrame:
                     )*100 / len(self._df), 2)])
                 for col in self._cols_order
                 if pd.isna(self._df[col].values).sum() > 0}
+            # sort in desc order as per the number of missing values
+            self._missing_cols = dict(sorted(self._missing_cols.items(),
+                                             key=lambda item: item[1][0],
+                                             reverse=True))
 
     def optimize(self) -> None:
         """
@@ -606,213 +678,3 @@ class CleanDataFrame:
                     self._df[col] = self._df[col].astype('category')
                     # update _cat_cols by removing col
                     self._cat_cols.pop(col)
-
-    def _duplicated_report(self) -> Tuple[str, Optional[pd.DataFrame]]:
-        """
-        Reports the duplicated rows.
-
-        Returns
-        -------
-        msg: str
-            A string contains a `header` which explaining the report purpose
-            and a `body` that show the details (as per the availability of
-            duplicated rows).
-        data: pandas.DataFrame or None
-            A dataframe of duplicated rows, or None if no duplicated rows.
-        """
-        # define report header
-        header = '- Checking if data frame has duplicated rows ... '
-
-        # check duplication to put in report body
-        if len(self._duplicate_inds) > 0:
-            body = (
-                f'\nThe dataset has {len(self._duplicate_inds)} duplicated'
-                f''' rows, which is {round(len(self._duplicate_inds
-                )*100 / len(self._df), 2)}% from the dataset, duplicated '''
-                'rows are:')
-            data = self._df.iloc[self._duplicate_inds]
-        else:
-            body = 'No duplications.'
-            data = None
-
-        # collect the msg from header and body
-        msg = header + body
-        # return the duplicated full report
-        return msg, data
-
-    def _optimization_report(self) -> Tuple[str, Optional[pd.DataFrame]]:
-        """
-        Reports the columns that can change datatypes for optimization.
-
-        Returns
-        -------
-        msg: str
-            A string contains a `header` which explaining the report purpose
-            and a `body` that show the details (as per the availability of
-            numerical columns to optimize).
-        data: pandas.DataFrame or None
-            A dataframe of columns optimization datatype details, or None if
-            no columns to optimize.
-        """
-        # define report header
-        header = '- Checking datatypes to optimize memory ... '
-
-        # Checking if we have numeraical columns to optimize
-        if self._cols_to_optimize != {}:
-            # assign body
-            body = '\nThese numarical columns can be down graded:'
-            # convert data types as
-            # {data type: list of columns that can convert to this type}
-            optimize_dict = {
-                re.findall('\\.(\\w*)', str(to_type))[0]: ', '.join(
-                    [col for col in self._cols_to_optimize.keys()
-                     if self._cols_to_optimize[col] == to_type])
-                for to_type in set(self._cols_to_optimize.values())}
-            # convert optimize_dict to dataframe and assign to data
-            data = pd.DataFrame.from_dict(
-                optimize_dict, orient='index', columns=['columns'])
-        else:
-            body = 'No columns to optimize.'
-            data = None
-
-        # collect the msg from header and body
-        msg = header + body
-        # return the optimization report
-        return msg, data
-
-    def _cat_report(self) -> Tuple[str, Optional[pd.DataFrame]]:
-        """
-        Reports the columns that can change to categorical for optimization.
-
-        Returns
-        -------
-        msg: str
-            A string contains a `header` which explaining the report purpose
-            and a `body` that show the details (as per the availability of
-            categorical columns to optimize).
-        data: pandas.DataFrame or None
-            A dataframe of categorical columns with its unique values, or None
-            if no columns to be converted.
-        """
-        # define report header
-        header = '- Checking columns that can convert to categorical ... '
-
-        # Checking if we have string columns to convert
-        if self._cat_cols != {}:
-            # assign body
-            body = '\nThese columns can be converted to categorical:'
-            # convert cat_cols to dataframe and assign to data
-            cat_cols_dict = {col: ', '.join(self._cat_cols[col])
-                             for col in self._cat_cols.keys()}
-            data = pd.DataFrame.from_dict(cat_cols_dict, orient='index',
-                                          columns=['unique_values'])
-        else:
-            body = 'No columns to optimize.'
-            data = None
-
-        # collect the msg from header and body
-        msg = header + body
-        # return the optimization report
-        return msg, data
-
-    def _outliers_report(self) -> Tuple[str, Optional[pd.DataFrame]]:
-        """
-        Reports the outliers in columns.
-
-        Returns
-        -------
-        msg: str
-            A string contains a `header` which explaining the report purpose
-            and a `body` that show the details (as per the availability of
-            outliers in columns).
-        data: pandas.DataFrame or None
-            A dataframe of outlier details in columns, or None if no outliers.
-        """
-        # define report header
-        header = '- Checking for outliers ... '
-
-        # check outliers for report body
-        if self._outliers != {}:
-            body = '\nOutliers are:'
-            # assign outliers in descending order dataframe
-            data = pd.DataFrame.from_dict(
-                self._outliers, orient='index', columns=[
-                    'outliers_lower', 'outliers_upper', 'outliers_total',
-                    'outliers_percentage']
-                ).sort_values('outliers_total', ascending=False)
-        else:
-            body = 'No outliers.'
-            data = None
-
-        # collect the msg from header and body
-        msg = header + body
-        # return the outliers full report
-        return msg, data
-
-    def _missing_report(self, show_matrix, show_heat, matrix_kws, heat_kws)\
-        -> Tuple[str, Optional[pd.DataFrame], Optional[plt.Axes],
-                 Optional[plt.Axes]]:
-        """
-        Reports the missing values with matrix and heat plot details.
-
-        Parameters
-        ----------
-        show_matrix : bool
-            A flag to control whether to show the missing value matrix plot or
-            not.
-        show_heat : bool
-            A flag to control whether to show the missing value heatmap plot
-            or not.
-        matrix_kws : dict
-            Keyword arguments passed to the missing value matrix plot.
-        heat_kws : dict
-            Keyword arguments passed to the missing value heatmap plot.
-
-        Returns
-        -------
-        msg : str
-            A string contains a `header` which explaining the report purpose
-            and a `body` that show the details (as per the availability of
-            missing values)
-        data : pandasd.DataFrame or None
-            A dataframe of missing values details, or None if no missings
-        matrix : plt.Axes or None
-            A Matrix plot (from `missingno` backage) if there are missing
-            values and show_matrix is True, or None otherwise
-        heat : plt.Axes or None
-            A Heat plot (from `missingno` backage) if there are missing
-            values and show_heat is True, or None otherwise.
-
-        """
-        # define report header
-        header = '- Checking for missing values ... '
-        # assaign data, matrix, heat as None
-        data, matrix, heat = None, None, None
-
-        # check missing values for body report
-        if self._missing_cols != {}:
-            # assign body value
-            body = '\nMissing details are:'
-            # select only columns with missing values to df
-            df = self._df[self._missing_cols.keys()]
-            # convert missing_cols to dataframe and show them
-            data = pd.DataFrame.from_dict(
-                self._missing_cols, orient='index', columns=[
-                    'missing_counts', 'missing_percentage']).sort_values(
-                'missing_counts', ascending=False)
-
-            # if show_matrix is True, save matrix plot in matrix
-            if show_matrix:
-                sort_by = data.index[0]
-                matrix = msno.matrix(df.sort_values(sort_by), **matrix_kws)
-
-            # if show_heat is True, save heat plot in heat
-            if show_heat:
-                heat = msno.heatmap(df, **heat_kws)
-        else:
-            body = 'No missing values.'
-
-        # collect the msg from header and body
-        msg = header + body
-        # return the missing full report
-        return msg, data, matrix, heat

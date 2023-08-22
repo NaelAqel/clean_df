@@ -15,7 +15,8 @@ requirements = [
     'numpy>=1.19.3',
     'pandas>=0.25.3',
     'IPython>=7.10',
-    'matplotlib>=3.0.3'
+    'matplotlib>=3.0.3',
+    'tabulate>=0.8.0'
 ]
 
 test_requirements = ['pytest>=3', ]
@@ -41,8 +42,8 @@ setup(
     license="MIT license",
     long_description=readme + '\n\n' + history,
     include_package_data=True,
-    keywords=['clean_df', 'cleaning', 'data analysis', 'data science', 'wrangling', 'reporting',
-              'optimization', 'outliers', 'missing'],
+    keywords=['clean_df', 'cleaning', 'data analysis', 'data science',
+              'wrangling', 'reporting', 'optimization', 'outliers', 'missing'],
     name='clean_df',
     packages=find_packages(include=['clean_df', 'clean_df.*']),
     test_suite='tests',
