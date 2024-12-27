@@ -1,0 +1,16 @@
+version: 2
+
+sphinx:
+  configuration: docs/conf.py
+
+python:
+  versions:
+    - 3.8
+    - 3.9
+    - 3.10
+    - 3.11
+  install:
+    - requirements: docs/requirements.txt
+
+build:
+  image: latest
