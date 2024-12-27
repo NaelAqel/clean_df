@@ -4,10 +4,7 @@ sphinx:
   configuration: docs/conf.py
 
 python:
-  versions:
-    - 3.8
-    - 3.9
-    - 3.10
+  version:
     - 3.11
   install:
     - requirements: docs/requirements.txt
