@@ -114,13 +114,11 @@ See the ``CONTRIBUTING.rst`` for contribution details. Feel free to contact me f
 
 * `Email`_
 * `LinkedIn`_
-* `WhatsApp`_
 
 Also, you are welcomed to visit my personal `blog`_ .
 
 .. _Email: mailto:dev@naelaqel.com
 .. _LinkedIn: https://www.linkedin.com/in/naelaqel1
-.. _WhatsApp: https://wa.me/962796780232
 .. _blog: https://naelaqel.com
 
    
